@@ -21,10 +21,9 @@ export default function LogInScreen({ navigation }) {
   });
 
   const handleLogin = () => {
-    // Here you can add validation for the email and password
-
-    // If login is successful, navigate to the Dashboard screen
-    navigation.navigate('Dashboard');
+    // Handle login logic
+    // If login is successful, navigate to the Dashboard
+    navigation.replace('Main'); // This takes the user to the Dashboard
   };
 
   return (

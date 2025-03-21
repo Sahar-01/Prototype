@@ -1,45 +1,34 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
 
 export default function DashboardScreen() {
+  const navigation = useNavigation(); // Get navigation object
+
+  // Handle the action based on the icon pressed
   const handleAction = (action) => {
     console.log(`Action: ${action}`);
-    // Add logic to navigate or handle different actions
+    switch (action) {
+      case 'search':
+        navigation.navigate('Search'); // Navigate to the Search screen
+        break;
+      case 'notifications':
+        navigation.navigate('Notifications'); // Navigate to Notifications screen
+        break;
+      case 'profile':
+        navigation.navigate('Profile'); // Navigate to Profile screen
+        break;
+      case 'home':
+        navigation.navigate('Dashboard'); // Navigate to Dashboard (Home)
+        break;
+      default:
+        break;
+    }
   };
 
   return (
     <View style={styles.container}>
-      {/* Dashboard content goes here */}
       <Text style={styles.title}>Dashboard</Text>
-
-      {/* Bottom navigation bar */}
-      <View style={styles.bottomBar}>
-        {/* First Section */}
-        <TouchableOpacity style={styles.bottomBarItem} onPress={() => handleAction('search')}>
-          <Image source={require('../assets/analytics.png')} style={[styles.icon, { width: 35, height: 35 }]} />
-        </TouchableOpacity>
-
-        {/* Second Section */}
-        <TouchableOpacity style={styles.bottomBarItem} onPress={() => handleAction('notifications')}>
-          <Image source={require('../assets/notification.png')} style={[styles.icon, { width: 30, height: 30 }]} />
-        </TouchableOpacity>
-
-        {/* Third Section (Home, centered) */}
-        <TouchableOpacity style={styles.bottomBarItem} onPress={() => handleAction('home')}>
-          <Image source={require('../assets/home.png')} style={[styles.icon, { width: 50, height: 50 }]} />
-        </TouchableOpacity>
-
-
-        {/* Fourth Section */}
-        <TouchableOpacity style={styles.bottomBarItem} onPress={() => handleAction('profile')}>
-          <Image source={require('../assets/history.png')} style={[styles.icon, { width: 35, height: 35 }]} />
-        </TouchableOpacity>
-
-        {/* Fifth Section */}
-        <TouchableOpacity style={styles.bottomBarItem} onPress={() => handleAction('profile')}>
-          <Image source={require('../assets/profile.png')} style={[styles.icon, { width: 35, height: 35 }]} />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -48,7 +37,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff', // Set background color to white
-    justifyContent: 'center', 
+    justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
