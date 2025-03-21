@@ -1,11 +1,11 @@
-// components/ProfileScreen.js
+// components/AnalyticsScreen.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function ProfileScreen() {
+export default function AnalyticsScreen() {
   return (
     <View style={styles.container}>
-      <Text>Profile Screen</Text>
+      <Text>Analytics screen</Text>
     </View>
   );
 }

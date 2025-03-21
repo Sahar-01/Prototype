@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#C6FF00',
-    paddingVertical: 10,
+    paddingVertical: 20, // Increased height for the bar
     paddingHorizontal: 20,
     borderTopWidth: 1,
     borderTopColor: '#C6FF00',

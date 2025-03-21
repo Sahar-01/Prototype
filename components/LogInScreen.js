@@ -1,18 +1,5 @@
-import React, { useState } from 'react';
-import {
-  StyleSheet,
-  SafeAreaView,
-  View,
-  Image,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, SafeAreaView, View, Image, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, BackHandler } from 'react-native';
 
 export default function LogInScreen({ navigation }) {
   const [form, setForm] = useState({
@@ -20,11 +7,29 @@ export default function LogInScreen({ navigation }) {
     password: '',
   });
 
+  // Login handler
   const handleLogin = () => {
+    // Validate form fields
+    if (!form.email || !form.password) {
+      alert('Please enter both email and password');
+      return;
+    }
+
     // Handle login logic
     // If login is successful, navigate to the Dashboard
     navigation.replace('Main'); // This takes the user to the Dashboard
   };
+
+  useEffect(() => {
+    const backAction = () => {
+      // Prevent back action on login screen
+      return true; // Returning true prevents default back action behavior
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
