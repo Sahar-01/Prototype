@@ -1,43 +1,107 @@
-// components/ProfileScreen.js
 import React from 'react';
-import { View, Text, StyleSheet, Button, Switch, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Switch, TouchableOpacity, ScrollView } from 'react-native';
 
 export default function ProfileScreen() {
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>My Profile</Text>
 
-      {/* Display user details */}
-      <Text style={styles.label}>Full Name: John Doe</Text>
-      <Text style={styles.label}>Email: john.doe@example.com</Text>
-      <Text style={styles.label}>Role: Employee</Text>
+      {/* User Info */}
+      <View style={styles.infoSection}>
+        <Text style={styles.label}>Full Name</Text>
+        <Text style={styles.value}>John Doe</Text>
 
-      {/* Currency preference */}
-      <Text style={styles.label}>Preferred Currency</Text>
-      <TextInput style={styles.input} placeholder="Enter preferred currency" />
+        <Text style={styles.label}>Email</Text>
+        <Text style={styles.value}>john.doe@example.com</Text>
 
-      {/* 2FA Toggle */}
-      <View style={styles.row}>
+        <Text style={styles.label}>Role</Text>
+        <Text style={styles.value}>Employee</Text>
+      </View>
+
+      {/* Editable Fields */}
+      <View style={styles.section}>
+        <Text style={styles.label}>Preferred Currency</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter preferred currency"
+          placeholderTextColor="#888"
+        />
+      </View>
+
+      <View style={styles.sectionRow}>
         <Text style={styles.label}>Enable 2FA</Text>
         <Switch value={true} />
       </View>
 
-      {/* Change Password Button */}
-      <Button title="Change Password" onPress={() => {}} />
+      {/* Buttons */}
+      <TouchableOpacity style={styles.primaryButton}>
+        <Text style={styles.buttonText}>Change Password</Text>
+      </TouchableOpacity>
 
-      {/* Logout Button */}
-      <View style={{ marginTop: 20 }}>
-        <Button title="Log Out" color="red" onPress={() => {}} />
-      </View>
-    </View>
+      <TouchableOpacity style={styles.logoutButton}>
+        <Text style={styles.buttonText}>Log Out</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-  label: { fontSize: 16, marginBottom: 10 },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginBottom: 20 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  container: {
+    padding: 20,
+    backgroundColor: '#f9f9f9',
+    flexGrow: 1,
+  },
+  header: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 25,
+    color: '#333',
+  },
+  infoSection: {
+    marginBottom: 30,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionRow: {
+    marginBottom: 30,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  label: {
+    fontSize: 16,
+    color: '#444',
+    marginBottom: 5,
+  },
+  value: {
+    fontSize: 16,
+    color: '#000',
+    marginBottom: 15,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 12,
+    backgroundColor: '#fff',
+  },
+  primaryButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  logoutButton: {
+    backgroundColor: '#dc3545',
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
 });
-
