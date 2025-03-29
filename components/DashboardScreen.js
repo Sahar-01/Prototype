@@ -101,7 +101,7 @@ const DashboardScreen = () => {
 
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => console.log("Manual Entry")} // You can add your manual entry function here
+            onPress={() => console.log("Manual")} // You can add your manual entry function here
           >
             <Text style={styles.optionText}>Manual</Text>
           </TouchableOpacity>
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 25,
     fontWeight: 'bold',
     marginBottom: 20,
   },
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     right: 30,
-    backgroundColor: '#ff6347', // Red color
+    backgroundColor: '#222', // Red color
     width: 70, // Increased size
     height: 70, // Increased size
     borderRadius: 35, // Circle shape
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   optionButton: {
-    backgroundColor: '#4CAF50', // Green color for options
+    backgroundColor: '#68636b', // Green color for options
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: 'bold',
   },
   imagePreview: {

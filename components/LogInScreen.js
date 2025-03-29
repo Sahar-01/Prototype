@@ -41,22 +41,22 @@ export default function LogInScreen({ navigation }) {
               <View style={styles.header}>
                 <Image alt="App Logo" resizeMode="contain" style={styles.headerImg} source={require('../assets/logo.png')} />
                 <Text style={styles.title}>
-                  Sign in to <Text style={styles.appName}>MyApp</Text>
+                  Sign in to <Text style={styles.appName}>MyExpense</Text>
                 </Text>
-                <Text style={styles.subtitle}>Get access to your portfolio and more</Text>
+                <Text style={styles.subtitle}>Get access to your claims and more</Text>
               </View>
 
               {/* Form */}
               <View style={styles.form}>
                 {/* Email Input */}
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Email address</Text>
+                  <Text style={styles.inputLabel}>Username</Text>
                   <TextInput
                     autoCapitalize="none"
                     autoCorrect={false}
-                    keyboardType="email-address"
+                    keyboardType="Username"
                     onChangeText={(email) => setForm({ ...form, email })}
-                    placeholder="john@example.com"
+                    placeholder="xx000000"
                     placeholderTextColor="#6b7280"
                     style={styles.inputControl}
                     value={form.email}

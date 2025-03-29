@@ -9,7 +9,6 @@ import DashboardScreen from './DashboardScreen'; // Your Main Dashboard Screen
 import SearchScreen from '../components/SearchScreen'; // Your Search Screen
 import NotificationsScreen from '../components/NotificationsScreen'; // Your Notifications Screen
 import ProfileScreen from '../components/ProfileScreen'; // Your Profile Screen
-import AnalyticsScreen from '../components/AnalyticsScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -30,16 +29,6 @@ function BottomTabNavigator() {
         headerShown: false,
       }}
     >
-      <Tab.Screen
-        name="Analytics"
-        component={AnalyticsScreen}
-        options={{
-          tabBarIcon: () => (
-            <Image source={require('../assets/analytics.png')} style={{ width: 35, height: 35 }} />
-          ),
-          tabBarLabel: () => null,
-        }}
-      />
 
       <Tab.Screen
         name="Search"
