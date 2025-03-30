@@ -7,18 +7,19 @@ export default function LogInScreen({ navigation }) {
     password: '',
   });
 
-  // Login handler
   const handleLogin = () => {
-    // Validate form fields
     if (!form.email || !form.password) {
       alert('Please enter both email and password');
       return;
     }
-
-    // Handle login logic
-    // If login is successful, navigate to the Dashboard
-    navigation.replace('Main'); // This takes the user to the Dashboard
+  
+    const isManager = form.email.startsWith('0');
+    console.log('Is Manager:', isManager);
+  
+    navigation.replace('Main', { isManager });
   };
+  
+  
 
   useEffect(() => {
     const backAction = () => {

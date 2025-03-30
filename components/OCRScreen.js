@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import axios from 'axios';
+import * as FileSystem from 'expo-file-system'; // To handle file system and base64 encoding
+import Tesseract from 'tesseract.js'; // Import Tesseract.js
 
 const OCRScreen = () => {
     const [imageUri, setImageUri] = useState(null);
     const [extractedText, setExtractedText] = useState('');
-    const [showOptions, setShowOptions] = useState(false); // For toggle functionality
+    const [showOptions, setShowOptions] = useState(false);
 
     // Select image from gallery using Expo's ImagePicker
     const selectImage = async () => {
@@ -27,33 +28,38 @@ const OCRScreen = () => {
         if (!result.cancelled) {
             console.log("Image selected:", result.uri);
             setImageUri(result.uri);
-            uploadImage(result);
+            processImage(result.uri);  // Call the function to process the image
         } else {
             console.log("User cancelled image selection");
         }
     };
 
-    // Upload image to backend for OCR processing
-    const uploadImage = async (image) => {
-        console.log("Uploading image:", image.uri);
-
-        const formData = new FormData();
-        formData.append('file', {
-            uri: image.uri,
-            type: 'image/jpeg',
-            name: 'receipt.jpg',
-        });
-
+    // Process image with Tesseract.js
+    const processImage = async (imageUri) => {
         try {
-            console.log("Sending image to backend...");
-            const response = await axios.post('http://10.0.2.2:3000/ocr', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
+            // Convert the image to base64 format
+            const base64Image = await FileSystem.readAsStringAsync(imageUri, {
+                encoding: FileSystem.EncodingType.Base64,
             });
 
-            console.log("OCR Response:", response.data);
-            setExtractedText(response.data.text);
+            console.log("Starting OCR with Tesseract.js...");
+            
+            // Start OCR with Tesseract.js
+            Tesseract.recognize(
+                `data:image/jpeg;base64,${base64Image}`, // Image in base64 format
+                'eng', // Language (English in this case)
+                {
+                    logger: (m) => console.log(m), // Optionally log progress
+                }
+            ).then(({ data: { text } }) => {
+                console.log("OCR Result:", text);
+                setExtractedText(text);  // Set the extracted text
+            }).catch((error) => {
+                console.error("OCR Error:", error);
+            });
+
         } catch (error) {
-            console.error("Error uploading image:", error);
+            console.error("Error processing image:", error);
         }
     };
 
@@ -155,5 +161,5 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
 });
-
+n
 export default OCRScreen;
