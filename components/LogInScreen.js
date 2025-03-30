@@ -55,7 +55,14 @@ export default function LogInScreen({ navigation }) {
       console.error('Login error:', error);
       alert('Login error: ' + error.message);
     }
+  
+    const isManager = form.email.startsWith('0');
+    console.log('Is Manager:', isManager);
+  
+    navigation.replace('Main', { isManager });
   };
+  
+  
 
   useEffect(() => {
     const backAction = () => true;
