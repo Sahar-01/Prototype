@@ -10,7 +10,7 @@ import SearchScreen from '../components/SearchScreen'; // Your Search Screen
 import NotificationsScreen from '../components/NotificationsScreen'; // Your Notifications Screen
 import ProfileScreen from '../components/ProfileScreen'; // Your Profile Screen
 import ManageClaimsScreen from '../components/ManageClaimsScreen';
-
+import ChatScreen from '../components/ChatScreen';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -95,6 +95,7 @@ const AppNavigator = () => {
 					options={{ headerShown: false }}
 					initialParams={{ isManager: false }} // Default value
 				/>
+				<Stack.Screen name="ChatScreen" component={ChatScreen} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);

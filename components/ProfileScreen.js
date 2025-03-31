@@ -38,6 +38,10 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
+  const goToChatScreen = () => {
+    navigation.navigate('ChatScreen');
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>My Profile</Text>
@@ -76,6 +80,11 @@ export default function ProfileScreen({ navigation }) {
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.buttonText}>Log Out</Text>
+      </TouchableOpacity>
+
+      {/* Assistance Button */}
+      <TouchableOpacity style={styles.assistanceButton} onPress={goToChatScreen}>
+        <Text style={styles.buttonText}>Assistance</Text>
       </TouchableOpacity>
 
       {/* Modal for Password Change */}
@@ -160,6 +169,15 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
+  },
+  assistanceButton: {
+    backgroundColor: '#28a745',
+    paddingVertical: 14,
+    borderRadius: 50,
+    alignItems: 'center',
+    marginTop: 20,
+    width: 150,
+    alignSelf: 'center',
   },
   buttonText: {
     color: '#fff',
