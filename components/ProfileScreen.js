@@ -1,7 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet, TextInput, Switch, TouchableOpacity, ScrollView } from 'react-native';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
+
+  const handleLogout = () => {
+    // Perform any cleanup actions like removing user data (e.g., AsyncStorage)
+    console.log('Logging out...');
+    
+    // Navigate back to Login and reset the navigation stack
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>My Profile</Text>
@@ -38,7 +50,8 @@ export default function ProfileScreen() {
         <Text style={styles.buttonText}>Change Password</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.logoutButton}>
+      {/* Logout Button */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.buttonText}>Log Out</Text>
       </TouchableOpacity>
     </ScrollView>
