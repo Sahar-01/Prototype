@@ -12,6 +12,11 @@ export default function LogInScreen({ navigation }) {
       alert('Please enter both email and password');
       return;
     }
+
+    if (!/^[0-9]{6}$/.test(form.email)) {
+      alert('Username must be exactly 6 digits');
+      return;
+    }
   
     const isManager = form.email.startsWith('0');
     console.log('Is Manager:', isManager);
@@ -19,12 +24,9 @@ export default function LogInScreen({ navigation }) {
     navigation.replace('Main', { isManager });
   };
   
-  
-
   useEffect(() => {
     const backAction = () => {
-      // Prevent back action on login screen
-      return true; // Returning true prevents default back action behavior
+      return true;
     };
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
@@ -55,9 +57,9 @@ export default function LogInScreen({ navigation }) {
                   <TextInput
                     autoCapitalize="none"
                     autoCorrect={false}
-                    keyboardType="Username"
+                    keyboardType="numeric"
                     onChangeText={(email) => setForm({ ...form, email })}
-                    placeholder="xx000000"
+                    placeholder="123456"
                     placeholderTextColor="#6b7280"
                     style={styles.inputControl}
                     value={form.email}
@@ -88,7 +90,7 @@ export default function LogInScreen({ navigation }) {
                 </View>
 
                 {/* Forgot Password */}
-                <TouchableOpacity onPress={() => { /* Handle forgot password */ }}>
+                <TouchableOpacity onPress={() => {}}>
                   <Text style={styles.formLink}>Forgot password?</Text>
                 </TouchableOpacity>
               </View>

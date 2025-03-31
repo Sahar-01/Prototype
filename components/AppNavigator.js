@@ -24,9 +24,9 @@ function BottomTabNavigator({ route }) {
 			screenOptions={{
 				tabBarStyle: {
 					backgroundColor: '#C6FF00',
-					height: 80,
+					height: 60,
 					paddingBottom: 10,
-					paddingTop: 20,
+					paddingTop: 10,
 					justifyContent: 'center',
 					alignItems: 'center',
 				},
@@ -43,15 +43,6 @@ function BottomTabNavigator({ route }) {
 			/>
 
 			<Tab.Screen
-				name="Dashboard"
-				component={DashboardScreen}
-				options={{
-					tabBarIcon: () => <Image source={require('../assets/home.png')} style={{ width: 50, height: 50 }} />,
-					tabBarLabel: () => null,
-				}}
-			/>
-
-			<Tab.Screen
 				name="Notifications"
 				component={NotificationsScreen}
 				options={{
@@ -61,14 +52,13 @@ function BottomTabNavigator({ route }) {
 			/>
 
 			<Tab.Screen
-				name="Profile"
-				component={ProfileScreen}
+				name="Dashboard"
+				component={DashboardScreen}
 				options={{
-					tabBarIcon: () => <Image source={require('../assets/profile.png')} style={{ width: 35, height: 35 }} />,
+					tabBarIcon: () => <Image source={require('../assets/home.png')} style={{ width: 50, height: 50 }} />,
 					tabBarLabel: () => null,
 				}}
 			/>
-
 			{/* Manager-Only Tab */}
 			{isManager && (
 				<Tab.Screen
@@ -80,6 +70,15 @@ function BottomTabNavigator({ route }) {
 					}}
 				/>
 			)}
+			
+			<Tab.Screen
+				name="Profile"
+				component={ProfileScreen}
+				options={{
+					tabBarIcon: () => <Image source={require('../assets/profile.png')} style={{ width: 35, height: 35 }} />,
+					tabBarLabel: () => null,
+				}}
+			/>
 		</Tab.Navigator>
 	);
 }
