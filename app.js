@@ -1,8 +1,8 @@
 import React from 'react';
-import MainPage from './components/MainPage';  // Import the MainPage component
+import AppNavigator from './components/AppNavigator';  // Adjust the path if necessary
 
 const App = () => {
-  return <MainPage />;  // Render the MainPage component
+  return <AppNavigator />;
 };
 
 export default App;
