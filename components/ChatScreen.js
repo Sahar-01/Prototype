@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { compareTwoStrings } from 'string-similarity'; // For fuzzy matching
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
 
-  // FAQ data
+  // FAQ data with questions and answers
   const faqData = [
     {
       question: "How do I add an expense?",
@@ -29,6 +30,7 @@ const ChatScreen = () => {
     },
   ];
 
+  // Function to send a message and match FAQ questions
   const sendMessage = (message) => {
     if (!message.trim()) return;
 
@@ -38,10 +40,8 @@ const ChatScreen = () => {
     // Clear input text after sending
     setInputText('');
 
-    // Check if the message is similar to any FAQ question
-    const matchedFAQ = faqData.find(faq =>
-      message.toLowerCase().includes(faq.question.toLowerCase())
-    );
+    // Find the best match for the FAQ question
+    const matchedFAQ = findBestFAQMatch(message);
 
     if (matchedFAQ) {
       // If a match is found, respond with the corresponding answer
@@ -52,13 +52,31 @@ const ChatScreen = () => {
     }
   };
 
+  // Function to find the best FAQ match using fuzzy comparison
+  const findBestFAQMatch = (input) => {
+    let bestMatch = null;
+    let highestScore = 0;
+
+    faqData.forEach((faq) => {
+      // Fuzzy match the user input with the FAQ question
+      const score = compareTwoStrings(input.toLowerCase(), faq.question.toLowerCase());
+      if (score > highestScore && score >= 0.5) {
+        highestScore = score;
+        bestMatch = faq;
+      }
+    });
+
+    return bestMatch;
+  };
+
+  // Handle FAQ button click (just for quicker access)
   const handleFAQClick = (answer) => {
-    // Simulate sending the FAQ answer as bot message
     setMessages((prev) => [...prev, { text: answer, sender: 'bot' }]);
   };
 
   return (
     <View style={styles.container}>
+      {/* Chat message display */}
       <FlatList
         data={messages}
         keyExtractor={(item, index) => index.toString()}
@@ -69,6 +87,7 @@ const ChatScreen = () => {
         )}
       />
 
+      {/* FAQ buttons */}
       <FlatList
         data={faqData}
         keyExtractor={(item, index) => `faq-${index}`}
@@ -82,6 +101,7 @@ const ChatScreen = () => {
         )}
       />
 
+      {/* User input section */}
       <TextInput
         style={styles.input}
         value={inputText}
@@ -95,6 +115,7 @@ const ChatScreen = () => {
   );
 };
 
+// Styling for the app components
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#f9f9f9' },
   input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginTop: 10 },
