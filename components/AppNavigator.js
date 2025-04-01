@@ -1,22 +1,24 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Image, BackHandler } from 'react-native';
+import { Image } from 'react-native';
 
-import LoginScreen from './LogInScreen'; // Your Login Screen
-import DashboardScreen from './DashboardScreen'; // Your Main Dashboard Screen
-import SearchScreen from '../components/SearchScreen'; // Your Search Screen
-import NotificationsScreen from '../components/NotificationsScreen'; // Your Notifications Screen
-import ProfileScreen from '../components/ProfileScreen'; // Your Profile Screen
+import LoginScreen from './LogInScreen'; 
+import SignUpScreen from './SignUpScreen'; // Import SignUpScreen
+import DashboardScreen from './DashboardScreen'; 
+import SearchScreen from '../components/SearchScreen'; 
+import NotificationsScreen from '../components/NotificationsScreen'; 
+import ProfileScreen from '../components/ProfileScreen'; 
 import ManageClaimsScreen from '../components/ManageClaimsScreen';
 import ChatScreen from '../components/ChatScreen';
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function BottomTabNavigator({ route }) {
 	const { isManager } = route.params || { isManager: false }; // Default to false
-  console.log('BottomTabNavigator - Is Manager:', isManager);
+	console.log('BottomTabNavigator - Is Manager:', isManager);
   
 	return (
 		<Tab.Navigator
@@ -59,11 +61,12 @@ function BottomTabNavigator({ route }) {
 					tabBarLabel: () => null,
 				}}
 			/>
+
 			{/* Manager-Only Tab */}
 			{isManager && (
 				<Tab.Screen
 					name="ManageClaims"
-					component={ManageClaimsScreen} // You'll need to create this screen
+					component={ManageClaimsScreen}
 					options={{
 						tabBarIcon: () => <Image source={require('../assets/manage.png')} style={{ width: 35, height: 35 }} />,
 						tabBarLabel: () => null,
@@ -83,12 +86,12 @@ function BottomTabNavigator({ route }) {
 	);
 }
 
-
 const AppNavigator = () => {
 	return (
 		<NavigationContainer>
 			<Stack.Navigator initialRouteName="Login">
 				<Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+				<Stack.Screen name="SignUp" component={SignUpScreen} options={{ title: 'Sign Up' }} />
 				<Stack.Screen
 					name="Main"
 					component={BottomTabNavigator}

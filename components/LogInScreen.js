@@ -40,7 +40,6 @@ export default function LogInScreen({ navigation }) {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
             <View style={styles.container}>
-              {/* Header */}
               <View style={styles.header}>
                 <Image alt="App Logo" resizeMode="contain" style={styles.headerImg} source={require('../assets/logo.png')} />
                 <Text style={styles.title}>
@@ -49,9 +48,7 @@ export default function LogInScreen({ navigation }) {
                 <Text style={styles.subtitle}>Get access to your claims and more</Text>
               </View>
 
-              {/* Form */}
               <View style={styles.form}>
-                {/* Email Input */}
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>Username</Text>
                   <TextInput
@@ -66,7 +63,6 @@ export default function LogInScreen({ navigation }) {
                   />
                 </View>
 
-                {/* Password Input */}
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>Password</Text>
                   <TextInput
@@ -80,7 +76,6 @@ export default function LogInScreen({ navigation }) {
                   />
                 </View>
 
-                {/* Sign-in Button */}
                 <View style={styles.formAction}>
                   <TouchableOpacity onPress={handleLogin}>
                     <View style={styles.btn}>
@@ -89,11 +84,14 @@ export default function LogInScreen({ navigation }) {
                   </TouchableOpacity>
                 </View>
 
-                {/* Forgot Password */}
                 <TouchableOpacity onPress={() => {}}>
                   <Text style={styles.formLink}>Forgot password?</Text>
                 </TouchableOpacity>
               </View>
+
+              <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+                <Text style={styles.signUpText}>Don't have an account? <Text style={styles.signUpLink}>Sign up</Text></Text>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
@@ -185,4 +183,14 @@ const styles = StyleSheet.create({
     color: '#222',
     textAlign: 'center',
   },
+  signUpText: {
+    marginTop: 16,
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#222',
+  },
+  signUpLink: {
+    color: '#C6FF00',
+    fontWeight: 'bold',
+  }
 });
