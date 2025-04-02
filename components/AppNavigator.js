@@ -7,7 +7,7 @@ import { Image } from 'react-native';
 import LoginScreen from './LogInScreen'; 
 import SignUpScreen from './SignUpScreen'; // Import SignUpScreen
 import DashboardScreen from './DashboardScreen'; 
-import SearchScreen from '../components/SearchScreen'; 
+import History from '../components/History'; 
 import NotificationsScreen from '../components/NotificationsScreen'; 
 import ProfileScreen from '../components/ProfileScreen'; 
 import ManageClaimsScreen from '../components/ManageClaimsScreen';
@@ -37,7 +37,7 @@ function BottomTabNavigator({ route }) {
 		>
 			<Tab.Screen
 				name="Search"
-				component={SearchScreen}
+				component={History}
 				options={{
 					tabBarIcon: () => <Image source={require('../assets/history.png')} style={{ width: 35, height: 35 }} />,
 					tabBarLabel: () => null,

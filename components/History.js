@@ -1,11 +1,11 @@
-// components/SearchScreen.js
+// components/History.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function SearchScreen() {
+export default function History() {
   return (
     <View style={styles.container}>
-      <Text>Search Screen</Text>
+      <Text>History</Text>
     </View>
   );
 }
