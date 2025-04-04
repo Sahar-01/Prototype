@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  StyleSheet, 
-  SafeAreaView, 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity 
-} from 'react-native';
+import { StyleSheet, SafeAreaView, View, Text, FlatList, TouchableOpacity } from 'react-native';
 
 const FinanceScreen = () => {
   const [financeData, setFinanceData] = useState([]);
