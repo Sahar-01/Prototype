@@ -12,17 +12,25 @@ export default function LogInScreen({ navigation }) {
       alert('Please enter both email and password');
       return;
     }
-
+  
     if (!/^[0-9]{6}$/.test(form.email)) {
       alert('Username must be exactly 6 digits');
       return;
     }
   
     const isManager = form.email.startsWith('0');
-    console.log('Is Manager:', isManager);
+    const isFinance = form.email.startsWith('2');
+    if (isManager)  {
+      navigation.replace('Main', { isManager, isFinance });
+      console.log('Is Manager:', isManager);
+    }
+    if (isFinance)  {
+      console.log('Is Finance:', isFinance);
+    }
   
-    navigation.replace('Main', { isManager });
+    navigation.replace('Main', { isManager, isFinance });
   };
+  
   
   useEffect(() => {
     const backAction = () => {
