@@ -10,15 +10,18 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "expense_claims")
 public class ExpenseClaim {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private LocalDate date;
     private String category;
     private Double amount;
     private String status;  // PENDING, APPROVED, REJECTED
     private String reason;  // If rejected
 
-    private String receiptUrl; // Add this field
+    private String receiptUrl; // Receipt image path
 
     private String reasonForRejection;
 
@@ -28,10 +31,16 @@ public class ExpenseClaim {
     @ManyToOne
     private User manager; // Who reviews the claim
 
-    public void setReasonForRejection(String reason) {
-        this.reasonForRejection = reason;
+    // Custom manually added getter and setter for status (in case Lombok doesn't apply correctly)
+    public String getStatus() {
+        return status;
     }
-    // Getter and Setter
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    // Custom getter and setter for receiptUrl (already present)
     public String getReceiptUrl() {
         return receiptUrl;
     }
@@ -40,5 +49,8 @@ public class ExpenseClaim {
         this.receiptUrl = receiptUrl;
     }
 
+    // Setter for reasonForRejection (already present)
+    public void setReasonForRejection(String reason) {
+        this.reasonForRejection = reason;
+    }
 }
-

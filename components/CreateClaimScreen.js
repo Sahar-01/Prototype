@@ -16,6 +16,8 @@ import {
 import axios from 'axios';
 
 export default function CreateClaimScreen({ navigation }) {
+
+  
   const [claim, setClaim] = useState({
     category: '',
     amount: '',
@@ -24,28 +26,29 @@ export default function CreateClaimScreen({ navigation }) {
   });
 
   const handleSubmit = async () => {
-    if (!claim.category || !claim.amount || !claim.date) {
-      Alert.alert('Missing Information', 'Please fill in all required fields');
-      return;
-    }
-
+  
+    const payload = { ...claim, status: 'PENDING' };
+    console.log("Submitting claim payload:", payload);
+  
     try {
-      const response = await axios.post('http://192.168.1.72:8080/expenses/submit', {
-        ...claim,
-        status: 'PENDING',
-      });
-
+      const response = await axios.post('http://192.168.1.72:8080/expenses/submit', payload);
+      console.log("Response from backend:", response);
+  
       if (response.status === 200) {
-        Alert.alert('Success', 'Expense claim submitted successfully!');
+        alert('Success! Expense claim submitted.');
         navigation.goBack();
       } else {
-        Alert.alert('Failed', 'Unexpected server response');
+        alert(`Unexpected server response: ${response.status}`);
       }
     } catch (error) {
-      console.error('Submission error:', error);
-      Alert.alert('Error', 'Failed to submit claim');
+      console.error("Submission error:", error);
+      alert("Submission failed: " + (error.message || "Unknown error"));
     }
   };
+  
+  
+  
+  
 
   return (
     <KeyboardAvoidingView

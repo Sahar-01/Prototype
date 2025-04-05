@@ -3,20 +3,19 @@ import { View, Text, FlatList, TouchableOpacity, Image, Platform, StyleSheet } f
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 
-const DashboardScreen = () => {
+const DashboardScreen = ({ navigation }) => {
   const [imageUri, setImageUri] = useState(null);
   const [extractedText, setExtractedText] = useState('');
   const [claims, setClaims] = useState([]);
   const [hasPermission, setHasPermission] = useState(false);
-  const [showOptions, setShowOptions] = useState(false); // For toggling the visibility of smaller buttons
+  const [showOptions, setShowOptions] = useState(false);
 
-  // Request permission for gallery access (for Android)
   const requestPermission = async () => {
     if (Platform.OS === 'android') {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       setHasPermission(status === 'granted');
     } else {
-      setHasPermission(true); // iOS doesn't need explicit permission
+      setHasPermission(true);
     }
   };
 
@@ -24,7 +23,6 @@ const DashboardScreen = () => {
     requestPermission();
   }, []);
 
-  // Select image from gallery using Expo's ImagePicker
   const selectImage = async () => {
     if (!hasPermission) {
       console.log("Permission denied!");
@@ -38,20 +36,20 @@ const DashboardScreen = () => {
       quality: 1,
     });
 
-    if (!result.cancelled) {
-      setImageUri(result.uri);
-      uploadImage(result);
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const image = result.assets[0];
+      setImageUri(image.uri);
+      uploadImage(image);
     } else {
       console.log("User cancelled image selection");
     }
   };
 
-  // Upload image to backend for OCR processing
   const uploadImage = async (image) => {
     const formData = new FormData();
     formData.append('file', {
       uri: image.uri,
-      type: 'image/jpeg', // or use the image type returned by the picker
+      type: 'image/jpeg',
       name: 'receipt.jpg',
     });
 
@@ -67,7 +65,6 @@ const DashboardScreen = () => {
     }
   };
 
-  // Fetch claims from backend
   const fetchClaims = async () => {
     try {
       const response = await axios.get('http://10.0.2.2:3000/claims');
@@ -81,40 +78,35 @@ const DashboardScreen = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Dashboard</Text>
 
-      {/* Main "+" Button */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => setShowOptions(!showOptions)} // Toggle the visibility of smaller buttons
+        onPress={() => setShowOptions(!showOptions)}
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
 
-      {/* Show smaller options when "+" button is clicked */}
       {showOptions && (
         <View style={styles.optionsContainer}>
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={selectImage} // This will open the Image Picker for OCR
+            onPress={selectImage}
           >
             <Text style={styles.optionText}>OCR</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => console.log("Manual")} // You can add your manual entry function here
+            onPress={() => navigation.navigate('CreateClaim')}
           >
             <Text style={styles.optionText}>Manual</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      {/* Show Selected Image */}
       {imageUri && <Image source={{ uri: imageUri }} style={styles.imagePreview} />}
 
-      {/* Show Extracted Text */}
       {extractedText ? <Text>{`Extracted Text: ${extractedText}`}</Text> : null}
 
-      {/* Display Claims */}
       <FlatList
         data={claims}
         keyExtractor={(item) => item.id.toString()}
@@ -130,7 +122,6 @@ const DashboardScreen = () => {
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -147,10 +138,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     right: 30,
-    backgroundColor: '#222', // Red color
-    width: 70, // Increased size
-    height: 70, // Increased size
-    borderRadius: 35, // Circle shape
+    backgroundColor: '#222',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -166,19 +157,19 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     position: 'absolute',
-    bottom: 120, // Position options slightly above the main FAB
+    bottom: 120,
     right: 30,
     flexDirection: 'column',
     alignItems: 'flex-end',
   },
   optionButton: {
-    backgroundColor: '#68636b', // Green color for options
+    backgroundColor: '#68636b',
     width: 60,
     height: 60,
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10, // Space between options
+    marginBottom: 10,
   },
   optionText: {
     color: '#fff',

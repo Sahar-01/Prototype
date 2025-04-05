@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image } from 'react-native';
+import CreateClaimScreen from './CreateClaimScreen'; // or '../components/CreateClaimScreen'
 
 import LoginScreen from './LogInScreen'; 
 import SignUpScreen from './SignUpScreen'; // Import SignUpScreen
@@ -113,6 +114,7 @@ const AppNavigator = () => {
 					initialParams={{ isManager: false }} // Default value
 				/>
 				<Stack.Screen name="ChatScreen" component={ChatScreen} />
+				<Stack.Screen name="CreateClaim" component={CreateClaimScreen} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);
