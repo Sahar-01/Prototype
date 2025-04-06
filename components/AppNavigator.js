@@ -102,6 +102,7 @@ function BottomTabNavigator({ route }) {
   }  
 
 
+
 const AppNavigator = () => {
 	return (
 		<NavigationContainer>
