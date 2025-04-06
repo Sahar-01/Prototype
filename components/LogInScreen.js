@@ -22,38 +22,50 @@ export default function LogInScreen({ navigation }) {
   });
 
   const handleLogin = async () => {
-    if (!form.email || !form.password) {
-      alert('Please enter both email and password');
+    const { email, password } = form;
+
+    if (!email || !password) {
+      alert('Please enter both username and password');
+      return;
+    }
+
+    if (!/^[0-9]{6}$/.test(email)) {
+      alert('Username must be exactly 6 digits');
       return;
     }
 
     try {
-      const response = await fetch('http://192.168.1.72:8080/auth/login', {
+      const response = await fetch('http://192.168.0.68:3000/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: form.email,
-          password: form.password,
+          username: email,
+          password,
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+        alert(data.message || 'Login failed');
+        return;
       }
 
-      const token = await response.text();
-      console.log('Login success! Token:', token);
-      alert('Login success!');
+      console.log('✅ Login successful:', data.user);
 
-      const isManager = form.email.startsWith('0');
-      navigation.replace('Main', { isManager });
+      // Portal logic based on username prefix
+      const isManager = email.startsWith('0');
+      const isFinance = email.startsWith('2');
 
+      navigation.replace('Main', {
+        isManager,
+        isFinance,
+      });
     } catch (error) {
       console.error('Login error:', error);
-      alert('Login error: ' + error.message);
+      alert('Something went wrong. Please try again.');
     }
   };
 
@@ -88,7 +100,7 @@ export default function LogInScreen({ navigation }) {
                   <TextInput
                     autoCapitalize="none"
                     autoCorrect={false}
-                    keyboardType="default"
+                    keyboardType="numeric"
                     onChangeText={(email) => setForm({ ...form, email })}
                     placeholder="123456"
                     placeholderTextColor="#6b7280"
@@ -105,7 +117,7 @@ export default function LogInScreen({ navigation }) {
                     placeholder="********"
                     placeholderTextColor="#6b7280"
                     style={styles.inputControl}
-                    secureTextEntry
+                    secureTextEntry={true}
                     value={form.password}
                   />
                 </View>
@@ -118,7 +130,7 @@ export default function LogInScreen({ navigation }) {
                   </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => {}}>
                   <Text style={styles.formLink}>Forgot password?</Text>
                 </TouchableOpacity>
               </View>

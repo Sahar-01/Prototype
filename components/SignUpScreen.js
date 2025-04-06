@@ -10,38 +10,43 @@ export default function SignUpScreen({ navigation }) {
 
   const handleSignUp = async () => {
     const { username, email, password } = form;
-
+  
     if (!username || !email || !password) {
       Alert.alert('Please fill in all fields');
       return;
     }
-
+  
     try {
-      const response = await fetch('http://192.168.1.72:8080/auth/register', {
+      const response = await fetch('http://192.168.0.68:3000/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-          role: 'STAFF',
-        }),
+        body: JSON.stringify({ username, email, password }),
       });
-
-      if (response.ok) {
-        alert('Account created successfully!');
-        navigation.goBack(); // 👈 Keep this as requested
-      } else {
-        const message = await response.text();
-        Alert.alert('Registration failed', message);
+  
+      const text = await response.text(); // get raw response for debugging
+      console.log('📦 Raw response:', text);
+  
+      try {
+        const data = JSON.parse(text);
+        if (response.ok) {
+          Alert.alert('Success', 'Account created successfully!', [
+            { text: 'OK', onPress: () => navigation.goBack() },
+          ]);
+        } else {
+          Alert.alert('Registration failed', data.message || 'Unknown error');
+        }
+      } catch (parseErr) {
+        console.error('❌ JSON parse error:', parseErr);
+        Alert.alert('Error', 'Unexpected response from the server');
       }
     } catch (error) {
       console.error('Sign up error:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      Alert.alert('Error', 'Network request failed');
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
