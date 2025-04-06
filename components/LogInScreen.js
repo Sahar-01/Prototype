@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, SafeAreaView, View, Image, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, BackHandler } from 'react-native';
+import {
+  StyleSheet,
+  SafeAreaView,
+  View,
+  Image,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  BackHandler,
+} from 'react-native';
 
 export default function LogInScreen({ navigation }) {
   const [form, setForm] = useState({
@@ -7,38 +21,52 @@ export default function LogInScreen({ navigation }) {
     password: '',
   });
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!form.email || !form.password) {
       alert('Please enter both email and password');
       return;
     }
-  
-    if (!/^[0-9]{6}$/.test(form.email)) {
-      alert('Username must be exactly 6 digits');
-      return;
+
+    try {
+      const response = await fetch('http://192.168.1.72:8080/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: form.email,
+          password: form.password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const token = await response.text();
+      console.log('Login success! Token:', token);
+      alert('Login success!');
+
+      const isManager = form.email.startsWith('0');
+      navigation.replace('Main', { isManager });
+
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Login error: ' + error.message);
     }
   
     const isManager = form.email.startsWith('0');
-    const isFinance = form.email.startsWith('2');
-    if (isManager)  {
-      navigation.replace('Main', { isManager, isFinance });
-      console.log('Is Manager:', isManager);
-    }
-    if (isFinance)  {
-      console.log('Is Finance:', isFinance);
-    }
+    console.log('Is Manager:', isManager);
   
-    navigation.replace('Main', { isManager, isFinance });
+    navigation.replace('Main', { isManager });
   };
   
   
+
   useEffect(() => {
-    const backAction = () => {
-      return true;
-    };
-
+    const backAction = () => true;
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-
     return () => backHandler.remove();
   }, []);
 
@@ -49,7 +77,12 @@ export default function LogInScreen({ navigation }) {
           <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
             <View style={styles.container}>
               <View style={styles.header}>
-                <Image alt="App Logo" resizeMode="contain" style={styles.headerImg} source={require('../assets/logo.png')} />
+                <Image
+                  alt="App Logo"
+                  resizeMode="contain"
+                  style={styles.headerImg}
+                  source={require('../assets/logo.png')}
+                />
                 <Text style={styles.title}>
                   Sign in to <Text style={styles.appName}>MyExpense</Text>
                 </Text>
@@ -62,7 +95,7 @@ export default function LogInScreen({ navigation }) {
                   <TextInput
                     autoCapitalize="none"
                     autoCorrect={false}
-                    keyboardType="numeric"
+                    keyboardType="default"
                     onChangeText={(email) => setForm({ ...form, email })}
                     placeholder="123456"
                     placeholderTextColor="#6b7280"
@@ -79,7 +112,7 @@ export default function LogInScreen({ navigation }) {
                     placeholder="********"
                     placeholderTextColor="#6b7280"
                     style={styles.inputControl}
-                    secureTextEntry={true}
+                    secureTextEntry
                     value={form.password}
                   />
                 </View>
@@ -92,13 +125,15 @@ export default function LogInScreen({ navigation }) {
                   </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity onPress={() => {}}>
+                <TouchableOpacity>
                   <Text style={styles.formLink}>Forgot password?</Text>
                 </TouchableOpacity>
               </View>
 
               <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                <Text style={styles.signUpText}>Don't have an account? <Text style={styles.signUpLink}>Sign up</Text></Text>
+                <Text style={styles.signUpText}>
+                  Don't have an account? <Text style={styles.signUpLink}>Sign up</Text>
+                </Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -200,5 +235,5 @@ const styles = StyleSheet.create({
   signUpLink: {
     color: '#C6FF00',
     fontWeight: 'bold',
-  }
+  },
 });
