@@ -69,3 +69,53 @@ app.post('/auth/login', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://192.168.0.68:3000`);
 });
+
+// CLAIMS
+app.post('/expenses/submit', (req, res) => {
+  const { category, amount, date, staffId, status } = req.body;
+
+  if (!category || !amount || !date) {
+    return res.status(400).json({ message: 'Required fields are missing' });
+  }
+
+  const sql = 'INSERT INTO claims (category, amount, date, staffId, status) VALUES (?, ?, ?, ?, ?)';
+  const values = [category, amount, date, staffId || null, status || 'PENDING'];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('❌ Error inserting claim:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    console.log('✅ Claim submitted:', result.insertId);
+    return res.status(200).json({ message: 'Claim submitted successfully!' });
+  });
+});
+
+app.get('/claims', (req, res) => {
+  const sql = 'SELECT id, category, amount, date, status FROM claims ORDER BY id DESC LIMIT 5';
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('❌ Error fetching claims:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    res.status(200).json(results);
+  });
+});
+
+app.get('/claims/user/:username', (req, res) => {
+  const username = req.params.username;
+  const sql = 'SELECT id, category, amount, date, status FROM claims WHERE staffId = ? ORDER BY date DESC';
+
+  db.query(sql, [username], (err, results) => {
+    if (err) {
+      console.error('❌ Error fetching user claims:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    res.status(200).json(results);
+  });
+});
+
