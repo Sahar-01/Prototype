@@ -95,24 +95,6 @@ app.post('/expenses/submit', (req, res) => {
 });
 
 // Get claims for a specific user
-app.get('/claims', (req, res) => {
-  const { username } = req.query;
-
-  if (!username) {
-    return res.status(400).json({ message: 'Username is required' });
-  }
-
-  const sql = 'SELECT id, category, amount, date, status FROM claims WHERE staffId = ? ORDER BY id DESC';
-
-  db.query(sql, [username], (err, results) => {
-    if (err) {
-      console.error('❌ Error fetching claims:', err);
-      return res.status(500).json({ message: 'Database error' });
-    }
-
-    res.status(200).json(results);
-  });
-});
 
 
 // ========================== START SERVER ==========================

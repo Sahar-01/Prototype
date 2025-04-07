@@ -33,8 +33,8 @@ const DashboardScreen = ({ navigation, route }) => {
   useFocusEffect(
     useCallback(() => {
       requestPermission();
-      setClaims([]); // 🧹 Clear previous user's data
-      fetchClaims(); // 🔁 Load claims for current user
+      setClaims([]);
+      fetchClaims();
     }, [username])
   );
 
@@ -91,9 +91,12 @@ const DashboardScreen = ({ navigation, route }) => {
     });
   };
 
+  // Summary logic
+  const numberOfClaims = claims.length;
+  const totalValue = claims.reduce((sum, claim) => sum + parseFloat(claim.amount), 0).toFixed(2);
+
   return (
     <View style={styles.container}>
-
       <TouchableOpacity style={styles.fab} onPress={() => setShowOptions(!showOptions)}>
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
@@ -103,7 +106,6 @@ const DashboardScreen = ({ navigation, route }) => {
           <TouchableOpacity style={styles.optionButton} onPress={selectImage}>
             <Text style={styles.optionText}>OCR</Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.optionButton}
             onPress={() => navigation.navigate('CreateClaim', { username })}
@@ -127,11 +129,23 @@ const DashboardScreen = ({ navigation, route }) => {
                 <Text style={styles.claimStatus}>{item.status}</Text>
               </View>
               <Text style={styles.claimInfo}>
-                ${item.amount} • {item.date}
+                £{item.amount} • {item.date}
               </Text>
             </View>
           )}
         />
+      </View>
+
+      {/* 📦 Summary Boxes */}
+      <View style={styles.summaryContainer}>
+        <View style={styles.summaryBox}>
+          <Text style={styles.summaryLabel}>Number of Claims</Text>
+          <Text style={styles.summaryValue}>{numberOfClaims}</Text>
+        </View>
+        <View style={styles.summaryBox}>
+          <Text style={styles.summaryLabel}>Total Value</Text>
+          <Text style={styles.summaryValue}>£{totalValue}</Text>
+        </View>
       </View>
     </View>
   );
@@ -139,16 +153,6 @@ const DashboardScreen = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', padding: 20, backgroundColor: '#fff' },
-  logoutButton: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    backgroundColor: '#e74c3c',
-    borderRadius: 20,
-  },
-  logoutText: { color: '#fff', fontWeight: 'bold' },
   fab: {
     position: 'absolute',
     bottom: 30,
@@ -197,6 +201,33 @@ const styles = StyleSheet.create({
   claimCategory: { fontSize: 16, fontWeight: '600', color: '#333' },
   claimStatus: { fontSize: 14, fontWeight: '500', color: '#666' },
   claimInfo: { fontSize: 14, color: '#555' },
+
+  // 🎯 Summary styles
+  summaryContainer: {
+    width: '100%',
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  summaryBox: {
+    flex: 1,
+    backgroundColor: '#eef2f7',
+    padding: 16,
+    marginHorizontal: 6,
+    borderRadius: 12,
+    alignItems: 'center',
+    elevation: 2,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 6,
+  },
+  summaryValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+  },
 });
 
 export default DashboardScreen;
