@@ -84,21 +84,14 @@ export default function ProfileScreen({ route, navigation }) {
         </Picker>
       </View>
 
-      {/* Buttons */}
-      <TouchableOpacity style={styles.primaryButton} onPress={toggleModal}>
-        <Text style={styles.buttonText}>Change Password</Text>
-      </TouchableOpacity>
-
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.buttonText}>Log Out</Text>
       </TouchableOpacity>
 
-      {/* Assistance Button */}
       <TouchableOpacity style={styles.assistanceButton} onPress={goToChatScreen}>
         <Text style={styles.buttonText}>Assistance</Text>
       </TouchableOpacity>
 
-      {/* Modal for Password Change */}
       <Modal visible={isModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
