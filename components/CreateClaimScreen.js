@@ -17,7 +17,6 @@ import axios from 'axios';
 
 export default function CreateClaimScreen({ navigation }) {
 
-  
   const [claim, setClaim] = useState({
     category: '',
     amount: '',

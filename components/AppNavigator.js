@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image } from 'react-native';
 import CreateClaimScreen from './CreateClaimScreen'; // or '../components/CreateClaimScreen'
-
+import { CurrencyProvider } from '../components/CurrencyContext';
 import LoginScreen from './LogInScreen'; 
 import SignUpScreen from './SignUpScreen'; // Import SignUpScreen
 import DashboardScreen from './DashboardScreen'; 

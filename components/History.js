@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { useCurrency } from './CurrencyContext';
+import { convertCurrency } from './CurrencyUtils';
 
 export default function History({ route }) {
   const [claims, setClaims] = useState([]);
   const username = route.params?.username;
+  const { currency } = useCurrency();
+
 
   useEffect(() => {
     if (username) {
@@ -27,7 +31,9 @@ export default function History({ route }) {
         <Text style={styles.claimCategory}>{item.category}</Text>
         <Text style={styles.claimStatus}>{item.status}</Text>
       </View>
-      <Text style={styles.claimInfo}>${item.amount} • {item.date}</Text>
+      <Text style={styles.claimInfo}>
+        {convertCurrency(item.amount, currency)} {currency} • {item.date}
+      </Text>
     </View>
   );
 

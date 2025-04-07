@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Switch, TouchableOpacity, ScrollView, Modal } from 'react-native';
+import { useCurrency } from './CurrencyContext';
+import { Picker } from '@react-native-picker/picker';
 
 export default function ProfileScreen({ route, navigation }) {
   const { user } = route.params;
@@ -11,6 +13,7 @@ export default function ProfileScreen({ route, navigation }) {
       </View>
     );
   }
+  const { currency, setCurrency } = useCurrency();
   const [password, setPassword] = useState('');
   const [isModalVisible, setModalVisible] = useState(false);
   const [passwordValidations, setPasswordValidations] = useState({
@@ -68,18 +71,17 @@ export default function ProfileScreen({ route, navigation }) {
       </View>
 
       {/* Editable Fields */}
-      <View style={styles.section}>
-        <Text style={styles.label}>Preferred Currency</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter preferred currency"
-          placeholderTextColor="#888"
-        />
-      </View>
-
-      <View style={styles.sectionRow}>
-        <Text style={styles.label}>Enable 2FA</Text>
-        <Switch value={true} />
+      <View style={styles.input}>
+        <Picker
+          selectedValue={currency}
+          onValueChange={(itemValue) => setCurrency(itemValue)}
+          mode="dropdown"
+          dropdownIconColor="#000"
+        >
+          <Picker.Item label="USD - US Dollar" value="USD" />
+          <Picker.Item label="GBP - British Pound" value="GBP" />
+          <Picker.Item label="EUR - Euro" value="EUR" />
+        </Picker>
       </View>
 
       {/* Buttons */}
@@ -143,12 +145,6 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 20,
   },
-  sectionRow: {
-    marginBottom: 30,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   label: {
     fontSize: 16,
     color: '#444',
@@ -159,13 +155,16 @@ const styles = StyleSheet.create({
     color: '#000',
     marginBottom: 15,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 12,
-    backgroundColor: '#fff',
-  },
+    input: {
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 10,
+      padding: 0,
+      paddingHorizontal: 12,
+      backgroundColor: '#fff',
+      height: 50,
+      justifyContent: 'center',
+   },    
   primaryButton: {
     backgroundColor: '#007bff',
     paddingVertical: 14,
