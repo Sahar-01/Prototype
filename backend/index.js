@@ -13,7 +13,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'Chers070.302', // CHANGE THIS
+  password: 'Chers070.302', // CHANGE THIS IF NECESSARY
   database: 'expense_manager'
 });
 
@@ -24,6 +24,9 @@ db.connect((err) => {
   }
   console.log('✅ Connected to MySQL');
 });
+
+
+// ========================== AUTH ROUTES ==========================
 
 // Register endpoint
 app.post('/auth/register', async (req, res) => {
@@ -66,20 +69,19 @@ app.post('/auth/login', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://192.168.0.68:3000`);
-});
 
-// CLAIMS
+// ========================== CLAIM ROUTES ==========================
+
+// Submit a new claim
 app.post('/expenses/submit', (req, res) => {
   const { category, amount, date, staffId, status } = req.body;
 
-  if (!category || !amount || !date) {
+  if (!category || !amount || !date || !staffId) {
     return res.status(400).json({ message: 'Required fields are missing' });
   }
 
   const sql = 'INSERT INTO claims (category, amount, date, staffId, status) VALUES (?, ?, ?, ?, ?)';
-  const values = [category, amount, date, staffId || null, status || 'PENDING'];
+  const values = [category, amount, date, staffId, status || 'PENDING'];
 
   db.query(sql, values, (err, result) => {
     if (err) {
@@ -92,10 +94,17 @@ app.post('/expenses/submit', (req, res) => {
   });
 });
 
+// Get claims for a specific user
 app.get('/claims', (req, res) => {
-  const sql = 'SELECT id, category, amount, date, status FROM claims ORDER BY id DESC LIMIT 5';
+  const { username } = req.query;
 
-  db.query(sql, (err, results) => {
+  if (!username) {
+    return res.status(400).json({ message: 'Username is required' });
+  }
+
+  const sql = 'SELECT id, category, amount, date, status FROM claims WHERE staffId = ? ORDER BY id DESC';
+
+  db.query(sql, [username], (err, results) => {
     if (err) {
       console.error('❌ Error fetching claims:', err);
       return res.status(500).json({ message: 'Database error' });
@@ -105,17 +114,8 @@ app.get('/claims', (req, res) => {
   });
 });
 
-app.get('/claims/user/:username', (req, res) => {
-  const username = req.params.username;
-  const sql = 'SELECT id, category, amount, date, status FROM claims WHERE staffId = ? ORDER BY date DESC';
 
-  db.query(sql, [username], (err, results) => {
-    if (err) {
-      console.error('❌ Error fetching user claims:', err);
-      return res.status(500).json({ message: 'Database error' });
-    }
-
-    res.status(200).json(results);
-  });
+// ========================== START SERVER ==========================
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://192.168.109.30:${PORT}`);
 });
-

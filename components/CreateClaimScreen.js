@@ -1,5 +1,3 @@
-console.log("CreateClaimScreen loaded");
-
 import React, { useState } from 'react';
 import {
   Text,
@@ -15,46 +13,36 @@ import {
 } from 'react-native';
 import axios from 'axios';
 
-export default function CreateClaimScreen({ navigation }) {
+export default function CreateClaimScreen({ navigation, route }) {
+  const { username } = route.params;
 
-  
   const [claim, setClaim] = useState({
     category: '',
     amount: '',
     date: '',
-    staffId: '',
+    staffId: username,
   });
 
   const handleSubmit = async () => {
-  
     const payload = { ...claim, status: 'PENDING' };
     console.log("Submitting claim payload:", payload);
-  
+
     try {
-      const response = await axios.post('http://192.168.0.68:3000/expenses/submit', payload);
-      console.log("Response from backend:", response);
-  
+      const response = await axios.post('http://192.168.109.30:3000/expenses/submit', payload);
       if (response.status === 200) {
-        alert('Success! Expense claim submitted.');
-        navigation.goBack();
+        Alert.alert('Success!', 'Expense claim submitted.');
+        navigation.goBack(); // Will re-trigger useFocusEffect in Dashboard
       } else {
-        alert(`Unexpected server response: ${response.status}`);
+        Alert.alert('Error', `Unexpected server response: ${response.status}`);
       }
     } catch (error) {
       console.error("Submission error:", error);
-      alert("Submission failed: " + (error.message || "Unknown error"));
+      Alert.alert("Error", "Submission failed: " + (error.message || "Unknown error"));
     }
   };
-  
-  
-  
-  
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1 }}
-    >
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={styles.container}>
           <Text style={styles.title}>Create Expense Claim</Text>
@@ -79,13 +67,6 @@ export default function CreateClaimScreen({ navigation }) {
             placeholder="Date (YYYY-MM-DD)"
             value={claim.date}
             onChangeText={(text) => setClaim({ ...claim, date: text })}
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="Staff ID (optional)"
-            value={claim.staffId}
-            onChangeText={(text) => setClaim({ ...claim, staffId: text })}
           />
 
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>

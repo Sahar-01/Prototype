@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Switch, TouchableOpacity, ScrollView, Modal } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Switch,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  Alert,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Optional if you're storing anything
 
 export default function ProfileScreen({ navigation }) {
   const [password, setPassword] = useState('');
@@ -10,11 +21,15 @@ export default function ProfileScreen({ navigation }) {
     specialChar: false,
   });
 
-  const handleLogout = () => {
-    console.log('Logging out...');
+  const handleLogout = async () => {
+    console.log('🔒 Logging out...');
+
+    // Optional: Clear AsyncStorage if you store login info
+    // await AsyncStorage.clear();
+
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Login' }],
+      routes: [{ name: 'Login' }], // Reset stack to Login
     });
   };
 
@@ -31,10 +46,10 @@ export default function ProfileScreen({ navigation }) {
 
   const changePassword = () => {
     if (Object.values(passwordValidations).every(Boolean)) {
-      alert('Password changed successfully!');
+      Alert.alert('✅ Success', 'Password changed successfully!');
       toggleModal();
     } else {
-      alert('Ensure all password requirements are met.');
+      Alert.alert('❌ Error', 'Ensure all password requirements are met.');
     }
   };
 
@@ -58,7 +73,7 @@ export default function ProfileScreen({ navigation }) {
         <Text style={styles.value}>Employee</Text>
       </View>
 
-      {/* Editable Fields */}
+      {/* Preferences */}
       <View style={styles.section}>
         <Text style={styles.label}>Preferred Currency</Text>
         <TextInput
@@ -73,7 +88,7 @@ export default function ProfileScreen({ navigation }) {
         <Switch value={true} />
       </View>
 
-      {/* Buttons */}
+      {/* Actions */}
       <TouchableOpacity style={styles.primaryButton} onPress={toggleModal}>
         <Text style={styles.buttonText}>Change Password</Text>
       </TouchableOpacity>
@@ -82,12 +97,11 @@ export default function ProfileScreen({ navigation }) {
         <Text style={styles.buttonText}>Log Out</Text>
       </TouchableOpacity>
 
-      {/* Assistance Button */}
       <TouchableOpacity style={styles.assistanceButton} onPress={goToChatScreen}>
         <Text style={styles.buttonText}>Assistance</Text>
       </TouchableOpacity>
 
-      {/* Modal for Password Change */}
+      {/* Password Modal */}
       <Modal visible={isModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -99,9 +113,15 @@ export default function ProfileScreen({ navigation }) {
               style={styles.input}
             />
             <View>
-              <Text style={{ color: passwordValidations.length ? 'green' : 'red' }}>At least 10 characters</Text>
-              <Text style={{ color: passwordValidations.capital ? 'green' : 'red' }}>At least 1 capital letter</Text>
-              <Text style={{ color: passwordValidations.specialChar ? 'green' : 'red' }}>At least 1 special character</Text>
+              <Text style={{ color: passwordValidations.length ? 'green' : 'red' }}>
+                At least 10 characters
+              </Text>
+              <Text style={{ color: passwordValidations.capital ? 'green' : 'red' }}>
+                At least 1 capital letter
+              </Text>
+              <Text style={{ color: passwordValidations.specialChar ? 'green' : 'red' }}>
+                At least 1 special character
+              </Text>
             </View>
             <TouchableOpacity onPress={changePassword} style={styles.primaryButton}>
               <Text style={styles.buttonText}>Confirm</Text>

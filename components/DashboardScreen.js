@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,9 @@ import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 
-const DashboardScreen = ({ navigation }) => {
+const DashboardScreen = ({ navigation, route }) => {
+  const { username } = route.params;
+
   const [imageUri, setImageUri] = useState(null);
   const [extractedText, setExtractedText] = useState('');
   const [claims, setClaims] = useState([]);
@@ -30,13 +32,15 @@ const DashboardScreen = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      fetchClaims();
-    }, [])
+      requestPermission();
+      setClaims([]); // 🧹 Clear previous user's data
+      fetchClaims(); // 🔁 Load claims for current user
+    }, [username])
   );
 
   const fetchClaims = async () => {
     try {
-      const response = await axios.get('http://192.168.0.68:3000/claims');
+      const response = await axios.get(`http://192.168.109.30:3000/claims?username=${username}`);
       setClaims(response.data);
     } catch (error) {
       console.error('Error fetching claims:', error);
@@ -44,10 +48,7 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   const selectImage = async () => {
-    if (!hasPermission) {
-      console.log('Permission denied!');
-      return;
-    }
+    if (!hasPermission) return;
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -60,8 +61,6 @@ const DashboardScreen = ({ navigation }) => {
       const image = result.assets[0];
       setImageUri(image.uri);
       uploadImage(image);
-    } else {
-      console.log('User cancelled image selection');
     }
   };
 
@@ -74,15 +73,22 @@ const DashboardScreen = ({ navigation }) => {
     });
 
     try {
-      const response = await axios.post('http://192.168.0.68:3000/ocr', formData, {
+      const response = await axios.post('http://192.168.109.30:3000/ocr', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      console.log('OCR Response:', response.data);
       setExtractedText(response.data.text);
     } catch (error) {
       console.error('Error uploading image:', error);
     }
+  };
+
+  const handleLogout = () => {
+    setClaims([]);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
   };
 
   return (
@@ -100,7 +106,7 @@ const DashboardScreen = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => navigation.navigate('CreateClaim')}
+            onPress={() => navigation.navigate('CreateClaim', { username })}
           >
             <Text style={styles.optionText}>Manual</Text>
           </TouchableOpacity>
@@ -112,9 +118,8 @@ const DashboardScreen = ({ navigation }) => {
 
       <View style={styles.claimsListContainer}>
         <FlatList
-          data={claims}
+          data={claims.slice(0, 5)}
           keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <View style={styles.claimItem}>
               <View style={styles.claimHeader}>
@@ -133,25 +138,17 @@ const DashboardScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
+  container: { flex: 1, alignItems: 'center', padding: 20, backgroundColor: '#fff' },
+  logoutButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    backgroundColor: '#e74c3c',
+    borderRadius: 20,
   },
-  title: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 20,
-    marginBottom: 10,
-    alignSelf: 'flex-start',
-  },
+  logoutText: { color: '#fff', fontWeight: 'bold' },
   fab: {
     position: 'absolute',
     bottom: 30,
@@ -162,13 +159,8 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5,
   },
-  fabText: {
-    color: '#fff',
-    fontSize: 40,
-    fontWeight: 'bold',
-  },
+  fabText: { color: '#fff', fontSize: 40, fontWeight: 'bold' },
   optionsContainer: {
     position: 'absolute',
     bottom: 120,
@@ -185,21 +177,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  optionText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  imagePreview: {
-    width: 200,
-    height: 200,
-    marginTop: 10,
-  },
-  claimsListContainer: {
-    width: '100%',
-    maxHeight: '50%',
-    marginBottom: 10,
-  },
+  optionText: { color: '#fff', fontSize: 15, fontWeight: 'bold' },
+  imagePreview: { width: 200, height: 200, marginTop: 10 },
+  claimsListContainer: { width: '100%', maxHeight: '50%', marginBottom: 10 },
   claimItem: {
     width: '100%',
     paddingVertical: 10,
@@ -208,31 +188,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f4f8',
     marginBottom: 10,
     marginTop: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   claimHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 4,
   },
-  claimCategory: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  claimStatus: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#666',
-  },
-  claimInfo: {
-    fontSize: 14,
-    color: '#555',
-  },
+  claimCategory: { fontSize: 16, fontWeight: '600', color: '#333' },
+  claimStatus: { fontSize: 14, fontWeight: '500', color: '#666' },
+  claimInfo: { fontSize: 14, color: '#555' },
 });
 
 export default DashboardScreen;
