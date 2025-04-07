@@ -27,7 +27,7 @@ db.connect((err) => {
 // Register endpoint
 app.post('/auth/register', async (req, res) => {
   const { username, email, password } = req.body;
-  console.log('📥 Register received:', req.body);
+  console.log('📩 Received signup:', req.body);
 
   if (!username || !email || !password) {
     return res.status(400).json({ message: 'All fields are required' });
@@ -66,9 +66,10 @@ app.post('/auth/login', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://192.168.1.180:8081`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
 });
+
 
 // CLAIMS
 app.post('/expenses/submit', (req, res) => {
