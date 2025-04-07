@@ -36,7 +36,7 @@ export default function LogInScreen({ navigation }) {
     }
 
     try {
-      const response = await fetch('http://192.168.109.30:3000/auth/login', {
+      const response = await fetch('http://192.168.24.30:3000/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

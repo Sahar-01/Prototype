@@ -95,9 +95,39 @@ app.post('/expenses/submit', (req, res) => {
 });
 
 // Get claims for a specific user
+// Get claims for a specific user
+app.get('/claims', (req, res) => {
+  const { username } = req.query;
 
+  if (!username) {
+    return res.status(400).json({ message: 'Username is required' });
+  }
+
+  const sql = 'SELECT * FROM claims WHERE staffId = ? ORDER BY date DESC';
+  db.query(sql, [username], (err, results) => {
+    if (err) {
+      console.error('❌ Error fetching claims:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    res.status(200).json(results);
+  });
+});
+app.get('/claims/user/:username', (req, res) => {
+  const username = req.params.username;
+  const sql = 'SELECT id, category, amount, date, status FROM claims WHERE staffId = ? ORDER BY date DESC';
+
+  db.query(sql, [username], (err, results) => {
+    if (err) {
+      console.error('❌ Error fetching user claims:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    res.status(200).json(results);
+  });
+});
 
 // ========================== START SERVER ==========================
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://192.168.109.30:${PORT}`);
+  console.log(`🚀 Server running on http://192.168.24.30:${PORT}`);
 });

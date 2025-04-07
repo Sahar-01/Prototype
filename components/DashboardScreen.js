@@ -7,7 +7,9 @@ import {
   Image,
   Platform,
   StyleSheet,
+  Alert,
 } from 'react-native';
+import { PieChart } from 'react-native-svg-charts';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
@@ -40,7 +42,7 @@ const DashboardScreen = ({ navigation, route }) => {
 
   const fetchClaims = async () => {
     try {
-      const response = await axios.get(`http://192.168.109.30:3000/claims?username=${username}`);
+      const response = await axios.get(`http://192.168.24.30:3000/claims?username=${username}`);
       setClaims(response.data);
     } catch (error) {
       console.error('Error fetching claims:', error);
@@ -91,9 +93,47 @@ const DashboardScreen = ({ navigation, route }) => {
     });
   };
 
-  // Summary logic
   const numberOfClaims = claims.length;
   const totalValue = claims.reduce((sum, claim) => sum + parseFloat(claim.amount), 0).toFixed(2);
+
+  const getColor = (index) => {
+    const colors = ['#FF6B6B', '#4ECDC4', '#FFD93D', '#6A89CC', '#F8A5C2', '#60A3BC'];
+    return colors[index % colors.length];
+  };
+
+  const getCategoryChartData = () => {
+    const categoryTotals = {};
+    claims.forEach((claim) => {
+      if (categoryTotals[claim.category]) {
+        categoryTotals[claim.category] += parseFloat(claim.amount);
+      } else {
+        categoryTotals[claim.category] = parseFloat(claim.amount);
+      }
+    });
+
+    const pieData = [];
+    const legendItems = [];
+
+    Object.entries(categoryTotals).forEach(([category, value], index) => {
+      const color = getColor(index);
+
+      pieData.push({
+        key: category,
+        value,
+        svg: {
+          fill: color,
+          onPress: () => Alert.alert('Category', category),
+        },
+        arc: { outerRadius: '100%', padAngle: 0.02 },
+      });
+
+      legendItems.push({ category, color });
+    });
+
+    return { pieData, legendItems };
+  };
+
+  const { pieData, legendItems } = getCategoryChartData();
 
   return (
     <View style={styles.container}>
@@ -136,7 +176,6 @@ const DashboardScreen = ({ navigation, route }) => {
         />
       </View>
 
-      {/* 📦 Summary Boxes */}
       <View style={styles.summaryContainer}>
         <View style={styles.summaryBox}>
           <Text style={styles.summaryLabel}>Number of Claims</Text>
@@ -147,6 +186,21 @@ const DashboardScreen = ({ navigation, route }) => {
           <Text style={styles.summaryValue}>£{totalValue}</Text>
         </View>
       </View>
+
+      {claims.length > 0 && (
+        <View style={styles.chartContainer}>
+          <Text style={styles.chartTitle}>Claims by Category</Text>
+          <PieChart style={{ height: 200, width: 200 }} data={pieData} />
+          <View style={styles.legendContainer}>
+            {legendItems.map((item) => (
+              <View key={item.category} style={styles.legendItem}>
+                <View style={[styles.colorBox, { backgroundColor: item.color }]} />
+                <Text style={styles.legendText}>{item.category}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
     </View>
   );
 };
@@ -202,31 +256,65 @@ const styles = StyleSheet.create({
   claimStatus: { fontSize: 14, fontWeight: '500', color: '#666' },
   claimInfo: { fontSize: 14, color: '#555' },
 
-  // 🎯 Summary styles
   summaryContainer: {
     width: '100%',
-    marginTop: 20,
+    marginTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   summaryBox: {
     flex: 1,
     backgroundColor: '#eef2f7',
-    padding: 16,
+    padding: 10,
     marginHorizontal: 6,
-    borderRadius: 12,
+    borderRadius: 10,
     alignItems: 'center',
-    elevation: 2,
+    elevation: 1,
   },
   summaryLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#555',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   summaryValue: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
+  },
+
+  chartContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chartTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#333',
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: 10,
+    paddingHorizontal: 10,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 6,
+    marginBottom: 6,
+  },
+  colorBox: {
+    width: 12,
+    height: 12,
+    borderRadius: 2,
+    marginRight: 6,
+  },
+  legendText: {
+    fontSize: 12,
+    color: '#444',
   },
 });
 
