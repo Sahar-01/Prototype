@@ -14,7 +14,7 @@ export default function History({ route }) {
 
   const fetchClaims = async (username) => {
     try {
-      const response = await axios.get(`http://192.168.0.68:3000/claims/user/${username}`);
+      const response = await axios.get(`http://192.168.1.180:8081/claims/user/${username}`);
       setClaims(response.data);
     } catch (err) {
       console.error("Failed to fetch claims:", err);

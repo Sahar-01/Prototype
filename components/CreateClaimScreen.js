@@ -31,7 +31,7 @@ export default function CreateClaimScreen({ navigation }) {
     console.log("Submitting claim payload:", payload);
   
     try {
-      const response = await axios.post('http://192.168.0.68:3000/expenses/submit', payload);
+      const response = await axios.post('http://192.168.1.180:8081/expenses/submit', payload);
       console.log("Response from backend:", response);
   
       if (response.status === 200) {

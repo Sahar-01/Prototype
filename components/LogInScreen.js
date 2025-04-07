@@ -18,31 +18,31 @@ import {
 
 export default function LogInScreen({ navigation }) {
   const [form, setForm] = useState({
-    email: '',
+    username: '',
     password: '',
   });
 
   const handleLogin = async () => {
-    const { email, password } = form;
+    const { username, password } = form;
 
-    if (!email || !password) {
+    if (!username || !password) {
       alert('Please enter both username and password');
       return;
     }
 
-    if (!/^[0-9]{6}$/.test(email)) {
+    if (!/^[0-9]{6}$/.test(username)) {
       alert('Username must be exactly 6 digits');
       return;
     }
 
     try {
-      const response = await fetch('http://192.168.0.68:3000/auth/login', {
+      const response = await fetch('http://192.168.1.180:8081/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: email,
+          username: username, 
           password,
         }),
       });
@@ -56,8 +56,8 @@ export default function LogInScreen({ navigation }) {
 
       console.log('✅ Login successful:', data.user);
       // Portal logic based on username prefix
-      const isManager = email.startsWith('0');
-      const isFinance = email.startsWith('2');
+      const isManager = username.startsWith('0');
+      const isFinance = username.startsWith('2');
 
       navigation.replace('Main', {
         isManager,
@@ -101,11 +101,11 @@ export default function LogInScreen({ navigation }) {
                     autoCapitalize="none"
                     autoCorrect={false}
                     keyboardType="numeric"
-                    onChangeText={(email) => setForm({ ...form, email })}
+                    onChangeText={(username) => setForm({ ...form, username })}
                     placeholder="123456"
                     placeholderTextColor="#6b7280"
                     style={styles.inputControl}
-                    value={form.email}
+                    value={form.username}
                   />
                 </View>
 

@@ -2,9 +2,8 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
-
 const app = express();
-const PORT = 3000;
+const PORT = 8081;
 
 app.use(cors());
 app.use(express.json());
@@ -13,7 +12,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'Chers070.302', // CHANGE THIS
+  password: 'Zamzam123?', // CHANGE THIS
   database: 'expense_manager'
 });
 
@@ -28,6 +27,7 @@ db.connect((err) => {
 // Register endpoint
 app.post('/auth/register', async (req, res) => {
   const { username, email, password } = req.body;
+  console.log('📥 Register received:', req.body);
 
   if (!username || !email || !password) {
     return res.status(400).json({ message: 'All fields are required' });
@@ -67,7 +67,7 @@ app.post('/auth/login', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://192.168.0.68:3000`);
+  console.log(`🚀 Server running on http://192.168.1.180:8081`);
 });
 
 // CLAIMS

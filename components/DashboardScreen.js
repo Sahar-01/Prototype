@@ -36,7 +36,7 @@ const DashboardScreen = ({ navigation }) => {
 
   const fetchClaims = async () => {
     try {
-      const response = await axios.get('http://192.168.0.68:3000/claims');
+      const response = await axios.get('http://192.168.1.180:8081/claims');
       setClaims(response.data);
     } catch (error) {
       console.error('Error fetching claims:', error);
@@ -74,7 +74,7 @@ const DashboardScreen = ({ navigation }) => {
     });
 
     try {
-      const response = await axios.post('http://192.168.0.68:3000/ocr', formData, {
+      const response = await axios.post('http://192.168.1.180:8081/ocr', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

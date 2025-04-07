@@ -11,13 +11,15 @@ export default function SignUpScreen({ navigation }) {
   const handleSignUp = async () => {
     const { username, email, password } = form;
   
+    console.log('🧾 Submitting:', { username, email, password }); // 👈 Add this line
+  
     if (!username || !email || !password) {
       Alert.alert('Please fill in all fields');
       return;
     }
   
     try {
-      const response = await fetch('http://192.168.0.68:3000/auth/register', {
+      const response = await fetch('http://192.168.1.180:8081/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
