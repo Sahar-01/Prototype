@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Switch, TouchableOpacity, ScrollView, Modal } from 'react-native';
 
-export default function ProfileScreen({ navigation }) {
+export default function ProfileScreen({ route, navigation }) {
+  const { user } = route.params;
+  console.log('🧾 Profile user data:', user);
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>User not found</Text>
+      </View>
+    );
+  }
   const [password, setPassword] = useState('');
   const [isModalVisible, setModalVisible] = useState(false);
   const [passwordValidations, setPasswordValidations] = useState({
@@ -47,12 +56,12 @@ export default function ProfileScreen({ navigation }) {
       <Text style={styles.header}>My Profile</Text>
 
       {/* User Info */}
-      <View style={styles.infoSection}>
+            <View style={styles.infoSection}>
         <Text style={styles.label}>Full Name</Text>
-        <Text style={styles.value}>John Doe</Text>
+        <Text style={styles.value}>{user.full_name}</Text>
 
         <Text style={styles.label}>Email</Text>
-        <Text style={styles.value}>john.doe@example.com</Text>
+        <Text style={styles.value}>{user.email}</Text>
 
         <Text style={styles.label}>Role</Text>
         <Text style={styles.value}>Employee</Text>

@@ -21,7 +21,8 @@ const Tab = createBottomTabNavigator();
 function BottomTabNavigator({ route }) {
 	const isManager = route.params?.isManager ?? false;
 	const isFinance = route.params?.isFinance ?? false;
-	const username = route.params?.username ?? null;
+	const user = route.params?.user ?? null;
+	const username = user?.username ?? null;
   
 	console.log('BottomTabNavigator - Is Manager:', isManager, 'Is Finance:', isFinance);
 	
@@ -89,14 +90,16 @@ function BottomTabNavigator({ route }) {
 			}}
 		  />
 		)}
-		<Tab.Screen
-		  name="Profile"
-		  component={ProfileScreen}
-		  initialParams={{ username }}
-		  options={{
-			tabBarIcon: () => <Image source={require('../assets/profile.png')} style={{ width: 35, height: 35 }} />,
-			tabBarLabel: () => null,
-		  }}
+				<Tab.Screen
+					name="Profile"
+					component={ProfileScreen}
+					initialParams={{ user }} // ✅ full user object now
+				options={{
+					tabBarIcon: () => (
+					<Image source={require('../assets/profile.png')} style={{ width: 35, height: 35 }} />
+					),
+					tabBarLabel: () => null,
+		}}
 		/>
 	  </Tab.Navigator>
 	);

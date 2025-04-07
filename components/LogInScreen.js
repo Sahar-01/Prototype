@@ -62,6 +62,7 @@ export default function LogInScreen({ navigation }) {
       navigation.replace('Main', {
         isManager,
         isFinance,
+        user: data.user,
       });
     } catch (error) {
       console.error('Login error:', error);

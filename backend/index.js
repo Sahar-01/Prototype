@@ -26,17 +26,17 @@ db.connect((err) => {
 
 // Register endpoint
 app.post('/auth/register', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, full_name } = req.body;
   console.log('📩 Received signup:', req.body);
 
-  if (!username || !email || !password) {
+  if (!username || !email || !password || !full_name) {
     return res.status(400).json({ message: 'All fields are required' });
-  }
+  }  
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const query = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
-    db.query(query, [username, email, hashedPassword], (err) => {
+    const query = 'INSERT INTO users (username, email, password, full_name) VALUES (?, ?, ?, ?)';
+    db.query(query, [username, email, hashedPassword, full_name], (err) => {
       if (err) {
         console.error('Insert error:', err);
         return res.status(500).json({ message: 'Database error' });
@@ -62,7 +62,16 @@ app.post('/auth/login', (req, res) => {
 
     if (!isMatch) return res.status(401).json({ message: 'Invalid password' });
 
-    res.status(200).json({ message: 'Login successful', user: { id: user.id, username: user.username } });
+    res.status(200).json({
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        username: user.username,
+        full_name: user.full_name,
+        email: user.email,
+      },
+    });
+    
   });
 });
 
