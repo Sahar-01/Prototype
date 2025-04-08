@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, Switch, TouchableOpacity, ScrollView, Modal } from 'react-native';
+import { useCurrency } from './CurrencyContext';
 import { Picker } from '@react-native-picker/picker';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Modal,
-  Alert,
-} from 'react-native';
 
-export default function ProfileScreen({ navigation, route }) {
-  const user = route.params?.user || {};
+export default function ProfileScreen({ route, navigation }) {
+  const { user } = route.params;
+  console.log('🧾 Profile user data:', user);
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>User not found</Text>
+      </View>
+    );
+  }
+  const { currency, setCurrency } = useCurrency();
   const [password, setPassword] = useState('');
   const [preferredCurrency, setPreferredCurrency] = useState('GBP');
   const [isModalVisible, setModalVisible] = useState(false);
@@ -57,36 +58,31 @@ export default function ProfileScreen({ navigation, route }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>My Profile</Text>
 
-      <View style={styles.infoSection}>
+      {/* User Info */}
+            <View style={styles.infoSection}>
         <Text style={styles.label}>Full Name</Text>
-        <Text style={styles.value}>{user.full_name || '-'}</Text>
-
-        <Text style={styles.label}>Username</Text>
-        <Text style={styles.value}>{user.username || '-'}</Text>
+        <Text style={styles.value}>{user.full_name}</Text>
 
         <Text style={styles.label}>Email</Text>
-        <Text style={styles.value}>{user.email || '-'}</Text>
+        <Text style={styles.value}>{user.email}</Text>
+
+        <Text style={styles.label}>Role</Text>
+        <Text style={styles.value}>Employee</Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.label}>Preferred Currency</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={preferredCurrency}
-            onValueChange={(value) => setPreferredCurrency(value)}
-            style={styles.picker}
-          >
-            <Picker.Item label="GBP (£)" value="GBP" />
-            <Picker.Item label="USD ($)" value="USD" />
-            <Picker.Item label="EUR (€)" value="EUR" />
-            <Picker.Item label="JPY (¥)" value="JPY" />
-          </Picker>
-        </View>
+      {/* Editable Fields */}
+      <View style={styles.input}>
+        <Picker
+          selectedValue={currency}
+          onValueChange={(itemValue) => setCurrency(itemValue)}
+          mode="dropdown"
+          dropdownIconColor="#000"
+        >
+          <Picker.Item label="USD - US Dollar" value="USD" />
+          <Picker.Item label="GBP - British Pound" value="GBP" />
+          <Picker.Item label="EUR - Euro" value="EUR" />
+        </Picker>
       </View>
-
-      <TouchableOpacity style={styles.primaryButton} onPress={toggleModal}>
-        <Text style={styles.buttonText}>Change Password</Text>
-      </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.buttonText}>Log Out</Text>
@@ -158,25 +154,16 @@ const styles = StyleSheet.create({
     color: '#000',
     marginBottom: 15,
   },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    backgroundColor: '#fff',
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 12,
-    backgroundColor: '#fff',
-    marginTop: 10,
-    marginBottom: 10,
-  },
+    input: {
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 10,
+      padding: 0,
+      paddingHorizontal: 12,
+      backgroundColor: '#fff',
+      height: 50,
+      justifyContent: 'center',
+   },    
   primaryButton: {
     backgroundColor: '#007bff',
     paddingVertical: 14,

@@ -18,19 +18,19 @@ import {
 
 export default function LogInScreen({ navigation }) {
   const [form, setForm] = useState({
-    email: '',
+    username: '',
     password: '',
   });
 
   const handleLogin = async () => {
-    const { email, password } = form;
+    const { username, password } = form;
 
-    if (!email || !password) {
+    if (!username || !password) {
       alert('Please enter both username and password');
       return;
     }
 
-    if (!/^[0-9]{6}$/.test(email)) {
+    if (!/^[0-9]{6}$/.test(username)) {
       alert('Username must be exactly 6 digits');
       return;
     }
@@ -42,7 +42,7 @@ export default function LogInScreen({ navigation }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: email,
+          username: username, 
           password,
         }),
       });
@@ -64,6 +64,7 @@ export default function LogInScreen({ navigation }) {
         username: email,
         isManager,
         isFinance,
+        user: data.user,
       });
     } catch (error) {
       console.error('Login error:', error);
@@ -103,11 +104,11 @@ export default function LogInScreen({ navigation }) {
                     autoCapitalize="none"
                     autoCorrect={false}
                     keyboardType="numeric"
-                    onChangeText={(email) => setForm({ ...form, email })}
+                    onChangeText={(username) => setForm({ ...form, username })}
                     placeholder="123456"
                     placeholderTextColor="#6b7280"
                     style={styles.inputControl}
-                    value={form.email}
+                    value={form.username}
                   />
                 </View>
 

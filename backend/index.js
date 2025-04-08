@@ -2,9 +2,8 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
-
 const app = express();
-const PORT = 3000;
+const PORT = 8081;
 
 app.use(cors());
 app.use(express.json());
@@ -28,16 +27,17 @@ db.connect((err) => {
 // ========================== AUTH ROUTES ==========================
 
 app.post('/auth/register', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, full_name } = req.body;
+  console.log('📩 Received signup:', req.body);
 
-  if (!username || !email || !password) {
+  if (!username || !email || !password || !full_name) {
     return res.status(400).json({ message: 'All fields are required' });
-  }
+  }  
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const query = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
-    db.query(query, [username, email, hashedPassword], (err) => {
+    const query = 'INSERT INTO users (username, email, password, full_name) VALUES (?, ?, ?, ?)';
+    db.query(query, [username, email, hashedPassword, full_name], (err) => {
       if (err) {
         console.error('Insert error:', err);
         return res.status(500).json({ message: 'Database error' });
@@ -64,13 +64,23 @@ app.post('/auth/login', (req, res) => {
 
     res.status(200).json({
       message: 'Login successful',
-      user: { id: user.id, username: user.username, email: user.email }
+      user: {
+        id: user.id,
+        username: user.username,
+        full_name: user.full_name,
+        email: user.email,
+      },
     });
+    
   });
 });
 
-// ========================== CLAIM ROUTES ==========================
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+});
 
+
+// CLAIMS
 app.post('/expenses/submit', (req, res) => {
   const { category, amount, date, staffId, status } = req.body;
 
