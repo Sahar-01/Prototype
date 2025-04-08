@@ -25,7 +25,6 @@ db.connect((err) => {
   console.log('✅ Connected to MySQL');
 });
 
-
 // ========================== AUTH ROUTES ==========================
 
 app.post('/auth/register', async (req, res) => {
@@ -70,7 +69,6 @@ app.post('/auth/login', (req, res) => {
   });
 });
 
-
 // ========================== CLAIM ROUTES ==========================
 
 app.post('/expenses/submit', (req, res) => {
@@ -108,7 +106,6 @@ app.get('/claims', (req, res) => {
       return res.status(200).json(results);
     });
   } else {
-    // ✅ No username — return all claims for finance
     const sql = 'SELECT * FROM claims ORDER BY date DESC';
     db.query(sql, (err, results) => {
       if (err) {
@@ -120,7 +117,6 @@ app.get('/claims', (req, res) => {
   }
 });
 
-// Get claims by username via URL param
 app.get('/claims/user/:username', (req, res) => {
   const username = req.params.username;
   const sql = 'SELECT id, category, amount, date, status FROM claims WHERE staffId = ? ORDER BY date DESC';
@@ -135,7 +131,7 @@ app.get('/claims/user/:username', (req, res) => {
   });
 });
 
-// ✅ Update claim status
+// ✅ Update claim status and insert notification
 app.put('/claims/:id/status', (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -144,17 +140,47 @@ app.put('/claims/:id/status', (req, res) => {
     return res.status(400).json({ message: 'Status is required' });
   }
 
-  const sql = 'UPDATE claims SET status = ? WHERE id = ?';
-  db.query(sql, [status, id], (err, result) => {
-    if (err) {
-      console.error('❌ Error updating status:', err);
-      return res.status(500).json({ message: 'Database error' });
+  const getClaim = 'SELECT staffId FROM claims WHERE id = ?';
+  db.query(getClaim, [id], (err, claimResults) => {
+    if (err || claimResults.length === 0) {
+      return res.status(404).json({ message: 'Claim not found' });
     }
 
-    res.status(200).json({ message: 'Status updated successfully' });
+    const staffId = claimResults[0].staffId;
+
+    const updateQuery = 'UPDATE claims SET status = ? WHERE id = ?';
+    db.query(updateQuery, [status, id], (err) => {
+      if (err) {
+        console.error('❌ Error updating status:', err);
+        return res.status(500).json({ message: 'Database error' });
+      }
+
+      const notifMessage = `Your claim #${id} has been ${status}`;
+      const notifQuery = 'INSERT INTO notifications (username, message) VALUES (?, ?)';
+      db.query(notifQuery, [staffId, notifMessage], (notifErr) => {
+        if (notifErr) {
+          console.error('❌ Error inserting notification:', notifErr);
+        }
+        res.status(200).json({ message: 'Status updated and notification sent' });
+      });
+    });
   });
 });
 
+// ✅ Get notifications for a user
+app.get('/notifications/:username', (req, res) => {
+  const username = req.params.username;
+  const sql = 'SELECT * FROM notifications WHERE username = ? ORDER BY timestamp DESC';
+
+  db.query(sql, [username], (err, results) => {
+    if (err) {
+      console.error('❌ Error fetching notifications:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    res.status(200).json(results);
+  });
+});
 
 // ========================== START SERVER ==========================
 app.listen(PORT, () => {
