@@ -24,7 +24,6 @@ CREATE TABLE orders (
 SHOW TABLES;
 DESCRIBE users;
 
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=prototype_db
+INSERT INTO users (username, email, password_hash) 
+VALUES ('testuser', 'test@example.com', 'hashedpassword123');
+
