@@ -4,37 +4,23 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  Image,
-  Platform,
   StyleSheet,
   Alert,
 } from 'react-native';
 import { PieChart } from 'react-native-svg-charts';
-import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
 
 const DashboardScreen = ({ navigation, route }) => {
   const { username } = route.params;
 
-  const [imageUri, setImageUri] = useState(null);
-  const [extractedText, setExtractedText] = useState('');
   const [claims, setClaims] = useState([]);
-  const [hasPermission, setHasPermission] = useState(false);
+  const [extractedText, setExtractedText] = useState('');
   const [showOptions, setShowOptions] = useState(false);
-
-  const requestPermission = async () => {
-    if (Platform.OS === 'android') {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      setHasPermission(status === 'granted');
-    } else {
-      setHasPermission(true);
-    }
-  };
 
   useFocusEffect(
     useCallback(() => {
-      requestPermission();
       setClaims([]);
       fetchClaims();
     }, [username])
@@ -42,46 +28,72 @@ const DashboardScreen = ({ navigation, route }) => {
 
   const fetchClaims = async () => {
     try {
-      const response = await axios.get(`http://192.168.24.30:3000/claims?username=${username}`);
+      const response = await axios.get(`http://192.168.32.30:3000/claims?username=${username}`);
       setClaims(response.data);
     } catch (error) {
       console.error('Error fetching claims:', error);
     }
   };
 
-  const selectImage = async () => {
-    if (!hasPermission) return;
+  const selectImageFromGallery = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission denied', 'Please allow access to photo library.');
+      return;
+    }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
+      allowsEditing: false,
       quality: 1,
     });
 
-    if (!result.canceled && result.assets?.length > 0) {
+    if (!result.canceled && result.assets && result.assets.length > 0) {
       const image = result.assets[0];
-      setImageUri(image.uri);
-      uploadImage(image);
+      uploadImage(image.uri); // No need to show image
     }
   };
 
-  const uploadImage = async (image) => {
+  const uploadImage = async (uri) => {
     const formData = new FormData();
     formData.append('file', {
-      uri: image.uri,
+      uri,
       type: 'image/jpeg',
       name: 'receipt.jpg',
     });
-
+  
     try {
-      const response = await axios.post('http://192.168.109.30:3000/ocr', formData, {
+      const response = await axios.post('http://192.168.32.30:3000/ocr', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      setExtractedText(response.data.text);
+  
+      const extracted = response.data.text;
+      setExtractedText(extracted);
+      createClaimFromOCR(extracted);
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('OCR failed:', error);
+      Alert.alert('Error', 'OCR failed. Please try again.');
+    }
+  };
+  
+
+  const createClaimFromOCR = async (text) => {
+    const now = new Date();
+    const dummyAmount = 4.50;
+    const claim = {
+      username,
+      category: 'OCR',
+      amount: dummyAmount,
+      date: now.toISOString().split('T')[0],
+      description: text,
+      status: 'Pending',
+    };
+
+    try {
+      await axios.post('http://192.168.32.30:3000/claims', claim);
+      fetchClaims(); // Refresh claims list to include this one
+    } catch (error) {
+      console.error('Error creating OCR claim:', error);
     }
   };
 
@@ -143,7 +155,7 @@ const DashboardScreen = ({ navigation, route }) => {
 
       {showOptions && (
         <View style={styles.optionsContainer}>
-          <TouchableOpacity style={styles.optionButton} onPress={selectImage}>
+          <TouchableOpacity style={styles.optionButton} onPress={selectImageFromGallery}>
             <Text style={styles.optionText}>OCR</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -154,9 +166,6 @@ const DashboardScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
       )}
-
-      {imageUri && <Image source={{ uri: imageUri }} style={styles.imagePreview} />}
-      {extractedText ? <Text>{`Extracted Text: ${extractedText}`}</Text> : null}
 
       <View style={styles.claimsListContainer}>
         <FlatList
@@ -171,6 +180,9 @@ const DashboardScreen = ({ navigation, route }) => {
               <Text style={styles.claimInfo}>
                 £{item.amount} • {item.date}
               </Text>
+              {item.description && (
+                <Text style={styles.claimDescription}>{item.description}</Text>
+              )}
             </View>
           )}
         />
@@ -217,6 +229,7 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 10,
   },
   fabText: { color: '#fff', fontSize: 40, fontWeight: 'bold' },
   optionsContainer: {
@@ -225,6 +238,7 @@ const styles = StyleSheet.create({
     right: 30,
     flexDirection: 'column',
     alignItems: 'flex-end',
+    zIndex: 10,
   },
   optionButton: {
     backgroundColor: '#68636b',
@@ -236,7 +250,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   optionText: { color: '#fff', fontSize: 15, fontWeight: 'bold' },
-  imagePreview: { width: 200, height: 200, marginTop: 10 },
   claimsListContainer: { width: '100%', maxHeight: '50%', marginBottom: 10 },
   claimItem: {
     width: '100%',
@@ -255,7 +268,7 @@ const styles = StyleSheet.create({
   claimCategory: { fontSize: 16, fontWeight: '600', color: '#333' },
   claimStatus: { fontSize: 14, fontWeight: '500', color: '#666' },
   claimInfo: { fontSize: 14, color: '#555' },
-
+  claimDescription: { fontSize: 12, color: '#777', marginTop: 4 },
   summaryContainer: {
     width: '100%',
     marginTop: 10,
@@ -281,7 +294,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-
   chartContainer: {
     marginTop: 20,
     alignItems: 'center',

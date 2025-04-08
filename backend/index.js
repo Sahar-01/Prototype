@@ -2,7 +2,12 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const Tesseract = require('tesseract.js');
+const path = require('path');
+const fs = require('fs');
 
+const upload = multer({ dest: 'uploads/' });
 const app = express();
 const PORT = 3000;
 
@@ -131,6 +136,27 @@ app.get('/claims/user/:username', (req, res) => {
   });
 });
 
+app.post('/claims', (req, res) => {
+  const { category, amount, date, username, description, status } = req.body;
+
+  if (!category || !amount || !date || !username) {
+    return res.status(400).json({ message: 'Required fields are missing' });
+  }
+
+  const sql = 'INSERT INTO claims (category, amount, date, staffId, description, status) VALUES (?, ?, ?, ?, ?, ?)';
+  const values = [category, amount, date, username, description || '', status || 'PENDING'];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('❌ Error inserting claim (OCR):', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    console.log('✅ OCR claim inserted:', result.insertId);
+    return res.status(200).json({ message: 'OCR claim submitted successfully!' });
+  });
+});
+
 // ✅ Update claim status and insert notification
 app.put('/claims/:id/status', (req, res) => {
   const { id } = req.params;
@@ -182,7 +208,26 @@ app.get('/notifications/:username', (req, res) => {
   });
 });
 
+app.post('/ocr', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded' });
+  }
+
+  const imagePath = path.join(__dirname, req.file.path);
+
+  Tesseract.recognize(imagePath, 'eng', { logger: m => console.log(m) })
+    .then(({ data: { text } }) => {
+      fs.unlinkSync(imagePath); // delete file after OCR
+      console.log('✅ OCR text:', text);
+      res.status(200).json({ text });
+    })
+    .catch((err) => {
+      console.error('❌ OCR error:', err);
+      fs.unlinkSync(imagePath);
+      res.status(500).json({ message: 'OCR failed', error: err.message });
+    });
+});
 // ========================== START SERVER ==========================
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://192.168.24.30:${PORT}`);
+  console.log(`🚀 Server running on http://192.168.32.30:${PORT}`);
 });
