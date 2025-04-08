@@ -3,13 +3,16 @@ import { StyleSheet, SafeAreaView, View, Text, TextInput, TouchableOpacity, Aler
 
 export default function SignUpScreen({ navigation }) {
   const [form, setForm] = useState({
+    full_name: '',
     username: '',
     email: '',
     password: '',
   });
 
   const handleSignUp = async () => {
-    const { username, email, password } = form;
+    const { username, email, password, full_name } = form;
+  
+    console.log('🧾 Submitting:', { username, email, password }); // 👈 Add this line
   
     if (!username || !email || !password) {
       Alert.alert('Please fill in all fields');
@@ -22,7 +25,7 @@ export default function SignUpScreen({ navigation }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ username, email, password, full_name }),
       });
   
       const text = await response.text(); // get raw response for debugging
@@ -52,6 +55,16 @@ export default function SignUpScreen({ navigation }) {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Create an Account</Text>
+
+                <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>Full Name</Text>
+          <TextInput
+            placeholder="Enter full name"
+            style={styles.inputControl}
+            onChangeText={(full_name) => setForm({ ...form, full_name })}
+            value={form.full_name}
+          />
+        </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Username</Text>

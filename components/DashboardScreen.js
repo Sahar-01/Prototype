@@ -13,6 +13,8 @@ import { PieChart } from 'react-native-svg-charts';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
+import { useCurrency } from './CurrencyContext';
+import { convertCurrency } from './CurrencyUtils';
 
 const DashboardScreen = ({ navigation, route }) => {
   const { username } = route.params;
@@ -22,6 +24,7 @@ const DashboardScreen = ({ navigation, route }) => {
   const [claims, setClaims] = useState([]);
   const [hasPermission, setHasPermission] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const { currency } = useCurrency();
 
   const requestPermission = async () => {
     if (Platform.OS === 'android') {
@@ -169,7 +172,7 @@ const DashboardScreen = ({ navigation, route }) => {
                 <Text style={styles.claimStatus}>{item.status}</Text>
               </View>
               <Text style={styles.claimInfo}>
-                £{item.amount} • {item.date}
+                 {convertCurrency(item.amount, currency)} {currency} • {item.date}
               </Text>
             </View>
           )}
