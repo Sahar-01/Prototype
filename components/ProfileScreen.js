@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
+import { Picker } from '@react-native-picker/picker';
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
-  Switch,
   TouchableOpacity,
   ScrollView,
   Modal,
   Alert,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Optional if you're storing anything
 
-export default function ProfileScreen({ navigation }) {
+export default function ProfileScreen({ navigation, route }) {
+  const user = route.params?.user || {};
   const [password, setPassword] = useState('');
+  const [preferredCurrency, setPreferredCurrency] = useState('GBP');
   const [isModalVisible, setModalVisible] = useState(false);
   const [passwordValidations, setPasswordValidations] = useState({
     length: false,
@@ -21,15 +22,10 @@ export default function ProfileScreen({ navigation }) {
     specialChar: false,
   });
 
-  const handleLogout = async () => {
-    console.log('🔒 Logging out...');
-
-    // Optional: Clear AsyncStorage if you store login info
-    // await AsyncStorage.clear();
-
+  const handleLogout = () => {
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Login' }], // Reset stack to Login
+      routes: [{ name: 'Login' }],
     });
   };
 
@@ -61,34 +57,33 @@ export default function ProfileScreen({ navigation }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>My Profile</Text>
 
-      {/* User Info */}
       <View style={styles.infoSection}>
         <Text style={styles.label}>Full Name</Text>
-        <Text style={styles.value}>John Doe</Text>
+        <Text style={styles.value}>{user.full_name || '-'}</Text>
+
+        <Text style={styles.label}>Username</Text>
+        <Text style={styles.value}>{user.username || '-'}</Text>
 
         <Text style={styles.label}>Email</Text>
-        <Text style={styles.value}>john.doe@example.com</Text>
-
-        <Text style={styles.label}>Role</Text>
-        <Text style={styles.value}>Employee</Text>
+        <Text style={styles.value}>{user.email || '-'}</Text>
       </View>
 
-      {/* Preferences */}
       <View style={styles.section}>
         <Text style={styles.label}>Preferred Currency</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter preferred currency"
-          placeholderTextColor="#888"
-        />
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={preferredCurrency}
+            onValueChange={(value) => setPreferredCurrency(value)}
+            style={styles.picker}
+          >
+            <Picker.Item label="GBP (£)" value="GBP" />
+            <Picker.Item label="USD ($)" value="USD" />
+            <Picker.Item label="EUR (€)" value="EUR" />
+            <Picker.Item label="JPY (¥)" value="JPY" />
+          </Picker>
+        </View>
       </View>
 
-      <View style={styles.sectionRow}>
-        <Text style={styles.label}>Enable 2FA</Text>
-        <Switch value={true} />
-      </View>
-
-      {/* Actions */}
       <TouchableOpacity style={styles.primaryButton} onPress={toggleModal}>
         <Text style={styles.buttonText}>Change Password</Text>
       </TouchableOpacity>
@@ -101,7 +96,6 @@ export default function ProfileScreen({ navigation }) {
         <Text style={styles.buttonText}>Assistance</Text>
       </TouchableOpacity>
 
-      {/* Password Modal */}
       <Modal visible={isModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -154,12 +148,6 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 20,
   },
-  sectionRow: {
-    marginBottom: 30,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   label: {
     fontSize: 16,
     color: '#444',
@@ -170,12 +158,24 @@ const styles = StyleSheet.create({
     color: '#000',
     marginBottom: 15,
   },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+  },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 10,
     padding: 12,
     backgroundColor: '#fff',
+    marginTop: 10,
+    marginBottom: 10,
   },
   primaryButton: {
     backgroundColor: '#007bff',

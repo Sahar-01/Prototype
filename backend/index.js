@@ -13,7 +13,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'Chers070.302', // CHANGE THIS IF NECESSARY
+  password: 'Chers070.302',
   database: 'expense_manager'
 });
 
@@ -28,7 +28,6 @@ db.connect((err) => {
 
 // ========================== AUTH ROUTES ==========================
 
-// Register endpoint
 app.post('/auth/register', async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -51,7 +50,6 @@ app.post('/auth/register', async (req, res) => {
   }
 });
 
-// Login endpoint
 app.post('/auth/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -65,14 +63,16 @@ app.post('/auth/login', (req, res) => {
 
     if (!isMatch) return res.status(401).json({ message: 'Invalid password' });
 
-    res.status(200).json({ message: 'Login successful', user: { id: user.id, username: user.username } });
+    res.status(200).json({
+      message: 'Login successful',
+      user: { id: user.id, username: user.username, email: user.email }
+    });
   });
 });
 
 
 // ========================== CLAIM ROUTES ==========================
 
-// Submit a new claim
 app.post('/expenses/submit', (req, res) => {
   const { category, amount, date, staffId, status } = req.body;
 
@@ -94,25 +94,33 @@ app.post('/expenses/submit', (req, res) => {
   });
 });
 
-// Get claims for a specific user
-// Get claims for a specific user
+// Get claims: all if no username, or by username
 app.get('/claims', (req, res) => {
   const { username } = req.query;
 
-  if (!username) {
-    return res.status(400).json({ message: 'Username is required' });
+  if (username) {
+    const sql = 'SELECT * FROM claims WHERE staffId = ? ORDER BY date DESC';
+    db.query(sql, [username], (err, results) => {
+      if (err) {
+        console.error('❌ Error fetching claims for user:', err);
+        return res.status(500).json({ message: 'Database error' });
+      }
+      return res.status(200).json(results);
+    });
+  } else {
+    // ✅ No username — return all claims for finance
+    const sql = 'SELECT * FROM claims ORDER BY date DESC';
+    db.query(sql, (err, results) => {
+      if (err) {
+        console.error('❌ Error fetching all claims:', err);
+        return res.status(500).json({ message: 'Database error' });
+      }
+      return res.status(200).json(results);
+    });
   }
-
-  const sql = 'SELECT * FROM claims WHERE staffId = ? ORDER BY date DESC';
-  db.query(sql, [username], (err, results) => {
-    if (err) {
-      console.error('❌ Error fetching claims:', err);
-      return res.status(500).json({ message: 'Database error' });
-    }
-
-    res.status(200).json(results);
-  });
 });
+
+// Get claims by username via URL param
 app.get('/claims/user/:username', (req, res) => {
   const username = req.params.username;
   const sql = 'SELECT id, category, amount, date, status FROM claims WHERE staffId = ? ORDER BY date DESC';
@@ -126,6 +134,27 @@ app.get('/claims/user/:username', (req, res) => {
     res.status(200).json(results);
   });
 });
+
+// ✅ Update claim status
+app.put('/claims/:id/status', (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ message: 'Status is required' });
+  }
+
+  const sql = 'UPDATE claims SET status = ? WHERE id = ?';
+  db.query(sql, [status, id], (err, result) => {
+    if (err) {
+      console.error('❌ Error updating status:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    res.status(200).json({ message: 'Status updated successfully' });
+  });
+});
+
 
 // ========================== START SERVER ==========================
 app.listen(PORT, () => {
