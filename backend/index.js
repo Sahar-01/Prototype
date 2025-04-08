@@ -184,5 +184,5 @@ app.get('/notifications/:username', (req, res) => {
 
 // ========================== START SERVER ==========================
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://192.168.24.30:${PORT}`);
+  console.log(`🚀 Server running on http://172.20.10.5:${PORT}`);
 });

@@ -17,7 +17,7 @@ const FinanceScreen = () => {
 
   const fetchAllClaims = async () => {
     try {
-      const response = await axios.get('http://192.168.24.30:3000/claims');
+      const response = await axios.get('http://172.20.10.5:3000/claims');
       setFinanceData(response.data);
     } catch (error) {
       console.error('❌ Error fetching all claims:', error);
