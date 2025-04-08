@@ -12,7 +12,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'Zamzam123?', // CHANGE THIS
+  password: 'Chers070.302',
   database: 'expense_manager'
 });
 
@@ -24,7 +24,8 @@ db.connect((err) => {
   console.log('✅ Connected to MySQL');
 });
 
-// Register endpoint
+// ========================== AUTH ROUTES ==========================
+
 app.post('/auth/register', async (req, res) => {
   const { username, email, password, full_name } = req.body;
   console.log('📩 Received signup:', req.body);
@@ -48,7 +49,6 @@ app.post('/auth/register', async (req, res) => {
   }
 });
 
-// Login endpoint
 app.post('/auth/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -84,12 +84,12 @@ app.listen(PORT, '0.0.0.0', () => {
 app.post('/expenses/submit', (req, res) => {
   const { category, amount, date, staffId, status } = req.body;
 
-  if (!category || !amount || !date) {
+  if (!category || !amount || !date || !staffId) {
     return res.status(400).json({ message: 'Required fields are missing' });
   }
 
   const sql = 'INSERT INTO claims (category, amount, date, staffId, status) VALUES (?, ?, ?, ?, ?)';
-  const values = [category, amount, date, staffId || null, status || 'PENDING'];
+  const values = [category, amount, date, staffId, status || 'PENDING'];
 
   db.query(sql, values, (err, result) => {
     if (err) {
@@ -102,17 +102,29 @@ app.post('/expenses/submit', (req, res) => {
   });
 });
 
+// Get claims: all if no username, or by username
 app.get('/claims', (req, res) => {
-  const sql = 'SELECT id, category, amount, date, status FROM claims ORDER BY id DESC LIMIT 5';
+  const { username } = req.query;
 
-  db.query(sql, (err, results) => {
-    if (err) {
-      console.error('❌ Error fetching claims:', err);
-      return res.status(500).json({ message: 'Database error' });
-    }
-
-    res.status(200).json(results);
-  });
+  if (username) {
+    const sql = 'SELECT * FROM claims WHERE staffId = ? ORDER BY date DESC';
+    db.query(sql, [username], (err, results) => {
+      if (err) {
+        console.error('❌ Error fetching claims for user:', err);
+        return res.status(500).json({ message: 'Database error' });
+      }
+      return res.status(200).json(results);
+    });
+  } else {
+    const sql = 'SELECT * FROM claims ORDER BY date DESC';
+    db.query(sql, (err, results) => {
+      if (err) {
+        console.error('❌ Error fetching all claims:', err);
+        return res.status(500).json({ message: 'Database error' });
+      }
+      return res.status(200).json(results);
+    });
+  }
 });
 
 app.get('/claims/user/:username', (req, res) => {
@@ -129,3 +141,58 @@ app.get('/claims/user/:username', (req, res) => {
   });
 });
 
+// ✅ Update claim status and insert notification
+app.put('/claims/:id/status', (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ message: 'Status is required' });
+  }
+
+  const getClaim = 'SELECT staffId FROM claims WHERE id = ?';
+  db.query(getClaim, [id], (err, claimResults) => {
+    if (err || claimResults.length === 0) {
+      return res.status(404).json({ message: 'Claim not found' });
+    }
+
+    const staffId = claimResults[0].staffId;
+
+    const updateQuery = 'UPDATE claims SET status = ? WHERE id = ?';
+    db.query(updateQuery, [status, id], (err) => {
+      if (err) {
+        console.error('❌ Error updating status:', err);
+        return res.status(500).json({ message: 'Database error' });
+      }
+
+      const notifMessage = `Your claim #${id} has been ${status}`;
+      const notifQuery = 'INSERT INTO notifications (username, message) VALUES (?, ?)';
+      db.query(notifQuery, [staffId, notifMessage], (notifErr) => {
+        if (notifErr) {
+          console.error('❌ Error inserting notification:', notifErr);
+        }
+        res.status(200).json({ message: 'Status updated and notification sent' });
+      });
+    });
+  });
+});
+
+// ✅ Get notifications for a user
+app.get('/notifications/:username', (req, res) => {
+  const username = req.params.username;
+  const sql = 'SELECT * FROM notifications WHERE username = ? ORDER BY timestamp DESC';
+
+  db.query(sql, [username], (err, results) => {
+    if (err) {
+      console.error('❌ Error fetching notifications:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    res.status(200).json(results);
+  });
+});
+
+// ========================== START SERVER ==========================
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://192.168.24.30:${PORT}`);
+});

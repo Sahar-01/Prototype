@@ -8,4 +8,3 @@ export const currencyRates = {
     const rate = currencyRates[targetCurrency] || 1;
     return (parseFloat(amount) * rate).toFixed(2);
   }
-  

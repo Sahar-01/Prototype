@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // at the top if not already there
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StyleSheet,
   SafeAreaView,
@@ -36,7 +36,7 @@ export default function LogInScreen({ navigation }) {
     }
 
     try {
-      const response = await fetch('http://192.168.1.180:8081/auth/login', {
+      const response = await fetch('http://192.168.24.30:3000/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,11 +55,13 @@ export default function LogInScreen({ navigation }) {
       }
 
       console.log('✅ Login successful:', data.user);
-      // Portal logic based on username prefix
-      const isManager = username.startsWith('0');
-      const isFinance = username.startsWith('2');
 
+      const isManager = email.startsWith('0');
+      const isFinance = email.startsWith('2');
+
+      // ✅ Pass username to Main stack
       navigation.replace('Main', {
+        username: email,
         isManager,
         isFinance,
         user: data.user,

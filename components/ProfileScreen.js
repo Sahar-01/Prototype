@@ -15,6 +15,7 @@ export default function ProfileScreen({ route, navigation }) {
   }
   const { currency, setCurrency } = useCurrency();
   const [password, setPassword] = useState('');
+  const [preferredCurrency, setPreferredCurrency] = useState('GBP');
   const [isModalVisible, setModalVisible] = useState(false);
   const [passwordValidations, setPasswordValidations] = useState({
     length: false,
@@ -23,7 +24,6 @@ export default function ProfileScreen({ route, navigation }) {
   });
 
   const handleLogout = () => {
-    console.log('Logging out...');
     navigation.reset({
       index: 0,
       routes: [{ name: 'Login' }],
@@ -43,10 +43,10 @@ export default function ProfileScreen({ route, navigation }) {
 
   const changePassword = () => {
     if (Object.values(passwordValidations).every(Boolean)) {
-      alert('Password changed successfully!');
+      Alert.alert('✅ Success', 'Password changed successfully!');
       toggleModal();
     } else {
-      alert('Ensure all password requirements are met.');
+      Alert.alert('❌ Error', 'Ensure all password requirements are met.');
     }
   };
 
@@ -103,9 +103,15 @@ export default function ProfileScreen({ route, navigation }) {
               style={styles.input}
             />
             <View>
-              <Text style={{ color: passwordValidations.length ? 'green' : 'red' }}>At least 10 characters</Text>
-              <Text style={{ color: passwordValidations.capital ? 'green' : 'red' }}>At least 1 capital letter</Text>
-              <Text style={{ color: passwordValidations.specialChar ? 'green' : 'red' }}>At least 1 special character</Text>
+              <Text style={{ color: passwordValidations.length ? 'green' : 'red' }}>
+                At least 10 characters
+              </Text>
+              <Text style={{ color: passwordValidations.capital ? 'green' : 'red' }}>
+                At least 1 capital letter
+              </Text>
+              <Text style={{ color: passwordValidations.specialChar ? 'green' : 'red' }}>
+                At least 1 special character
+              </Text>
             </View>
             <TouchableOpacity onPress={changePassword} style={styles.primaryButton}>
               <Text style={styles.buttonText}>Confirm</Text>
