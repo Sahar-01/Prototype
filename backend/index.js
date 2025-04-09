@@ -59,7 +59,6 @@ app.post('/auth/login', (req, res) => {
 
     const user = results[0];
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) return res.status(401).json({ message: 'Invalid password' });
 
     res.status(200).json({

@@ -56,8 +56,8 @@ export default function LogInScreen({ navigation }) {
 
           console.log('✅ Login successful:', data.user);
           
-          const isManager = email.startsWith('0');
-          const isFinance = email.startsWith('2');
+        const isManager = email.startsWith('0');
+        const isFinance = email.startsWith('2');
           
       navigation.replace('Main', {
       user: data.user,  // full user object
