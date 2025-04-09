@@ -18,7 +18,7 @@ export default function NotificationsScreen({ route }) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get(`http://192.168.32.30:3000/notifications/${username}`);
+      const response = await axios.get(`http://172.20.10.14:3000/notifications/${username}`);
       setNotifications(response.data);
     } catch (error) {
       console.error('❌ Error fetching notifications:', error);

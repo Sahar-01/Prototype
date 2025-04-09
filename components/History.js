@@ -26,7 +26,7 @@ const HistoryScreen = ({ route }) => {
 
   const fetchClaims = async () => {
     try {
-      const response = await axios.get(`http://192.168.32.30:3000/claims?username=${username}`);
+      const response = await axios.get(`http://172.20.10.14:3000/claims?username=${username}`);
       setClaims(response.data);
       setFilteredClaims(response.data);
     } catch (error) {

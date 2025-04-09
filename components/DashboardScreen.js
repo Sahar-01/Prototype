@@ -28,7 +28,7 @@ const DashboardScreen = ({ navigation, route }) => {
 
   const fetchClaims = async () => {
     try {
-      const response = await axios.get(`http://192.168.32.30:3000/claims?username=${username}`);
+      const response = await axios.get(`http://172.20.10.14:3000/claims?username=${username}`);
       setClaims(response.data);
     } catch (error) {
       console.error('Error fetching claims:', error);
@@ -63,7 +63,7 @@ const DashboardScreen = ({ navigation, route }) => {
     });
   
     try {
-      const response = await axios.post('http://192.168.32.30:3000/ocr', formData, {
+      const response = await axios.post('http://172.20.10.14:3000/ocr', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
   
@@ -90,7 +90,7 @@ const DashboardScreen = ({ navigation, route }) => {
     };
 
     try {
-      await axios.post('http://192.168.32.30:3000/claims', claim);
+      await axios.post('http://172.20.10.14:3000/claims', claim);
       fetchClaims(); // Refresh claims list to include this one
     } catch (error) {
       console.error('Error creating OCR claim:', error);
@@ -182,6 +182,22 @@ const DashboardScreen = ({ navigation, route }) => {
               </Text>
               {item.description && (
                 <Text style={styles.claimDescription}>{item.description}</Text>
+              )}
+              {item.status === 'Pending' && (
+                <TouchableOpacity
+                  style={[styles.optionButton, { backgroundColor: '#FF6B6B', marginTop: 10 }]}
+                  onPress={async () => {
+                    try {
+                      await axios.delete(`http://172.20.10.14:3000/claims/${item.id}`);
+                      fetchClaims(); // Refresh claims list
+                    } catch (error) {
+                      console.error('Error withdrawing claim:', error);
+                      Alert.alert('Error', 'Failed to withdraw claim. Please try again.');
+                    }
+                  }}
+                >
+                  <Text style={styles.optionText}>Withdraw</Text>
+                </TouchableOpacity>
               )}
             </View>
           )}

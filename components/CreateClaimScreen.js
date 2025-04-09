@@ -74,7 +74,7 @@ export default function CreateClaimScreen({ navigation, route }) {
     console.log("Submitting claim payload (in GBP):", payload);
 
     try {
-      const response = await axios.post('http://192.168.32.30:3000/expenses/submit', payload);
+      const response = await axios.post('http://172.20.10.14:3000/expenses/submit', payload);
       if (response.status === 200) {
         Alert.alert('Success!', 'Expense claim submitted.');
         navigation.goBack();

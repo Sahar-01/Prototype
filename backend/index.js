@@ -193,6 +193,25 @@ app.put('/claims/:id/status', (req, res) => {
   });
 });
 
+// ✅ delete claim by id, only if status is PENDING
+app.delete('/claims/:id', (req, res) => {
+  const { id } = req.params;
+
+  const sql = 'DELETE FROM claims WHERE id = ? AND status = "PENDING"';
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('❌ Error deleting claim:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Claim not found or cannot be deleted' });
+    }
+
+    res.status(200).json({ message: 'Claim deleted successfully!' });
+  });
+});
+
 // ✅ Get notifications for a user
 app.get('/notifications/:username', (req, res) => {
   const username = req.params.username;
@@ -229,5 +248,5 @@ app.post('/ocr', upload.single('file'), (req, res) => {
 });
 // ========================== START SERVER ==========================
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://192.168.32.30:${PORT}`);
+  console.log(`🚀 Server running on http://172.20.10.14:${PORT}`);
 });
