@@ -16,7 +16,13 @@ export default function SignUpScreen({ navigation }) {
       Alert.alert('Please fill in all fields');
       return;
     }
-  
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Invalid email format');
+      return;
+    }
+    
     try {
       const response = await fetch('http://192.168.1.180:3000/auth/register', {
         method: 'POST',
