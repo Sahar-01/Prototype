@@ -46,7 +46,7 @@ const OCRScreen = () => {
 
         try {
             console.log("Sending image to backend...");
-            const response = await axios.post('http://10.0.2.2:3000/ocr', formData, {
+            const response = await axios.post('http://192.168.1.180:3000/ocr', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
