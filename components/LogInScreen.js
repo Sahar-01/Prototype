@@ -59,11 +59,12 @@ export default function LogInScreen({ navigation }) {
       const isManager = email.startsWith('0');
       const isFinance = email.startsWith('2');
 
-      // ✅ Pass username to Main stack
+      // ✅ Pass full user object to Main stack
       navigation.replace('Main', {
         username: email,
         isManager,
         isFinance,
+        user: data.user, // <-- This passes username and email for ProfileScreen
       });
     } catch (error) {
       console.error('Login error:', error);

@@ -16,7 +16,7 @@ import { PieChart } from 'react-native-chart-kit';
 const screenWidth = Dimensions.get('window').width;
 
 const DashboardScreen = ({ navigation, route }) => {
-  const { username } = route.params;
+  const { username, user } = route.params;
 
   const [claims, setClaims] = useState([]);
   const [showOptions, setShowOptions] = useState(false);
@@ -101,6 +101,18 @@ const DashboardScreen = ({ navigation, route }) => {
     return colors[index % colors.length];
   };
 
+  const getStatusStyle = (status) => {
+    switch (status.toUpperCase()) {
+      case 'APPROVED':
+        return { backgroundColor: '#E8F5E9', color: '#2E7D32' };
+      case 'REJECTED':
+        return { backgroundColor: '#FFEBEE', color: '#C62828' };
+      case 'PENDING':
+      default:
+        return { backgroundColor: '#FFF3E0', color: '#EF6C00' };
+    }
+  };
+
   const getCategoryChartData = () => {
     const categoryTotals = {};
     claims.forEach((claim) => {
@@ -134,88 +146,98 @@ const DashboardScreen = ({ navigation, route }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => navigation.navigate('CreateClaim', { username })}
+            onPress={() => navigation.navigate('CreateClaim', { username, user })}
           >
             <Text style={styles.optionText}>Manual</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      <FlatList
-        contentContainerStyle={{ paddingTop: 20 }}  // <-- this adds space at the top
-        data={claims.slice(0, 5)}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.claimItem}>
-            <View style={styles.claimHeader}>
-              <Text style={styles.claimCategory}>{item.category}</Text>
-              <Text style={styles.claimStatus}>{item.status}</Text>
-            </View>
-            <Text style={styles.claimInfo}>
-              £{item.amount} • {item.date}
+      <View style={styles.fixedTopSection}>
+        <View style={styles.spacer} />
+        <View style={styles.summaryContainer}>
+          <View style={styles.summaryBox}>
+            <Text style={styles.summaryLabel}>Number of Claims</Text>
+            <Text style={styles.summaryValue}>{claims.length}</Text>
+          </View>
+          <View style={styles.summaryBox}>
+            <Text style={styles.summaryLabel}>Total Value</Text>
+            <Text style={styles.summaryValue}>
+              £{claims.reduce((sum, c) => sum + parseFloat(c.amount), 0).toFixed(2)}
             </Text>
-            {item.description && (
-              <Text style={styles.claimDescription}>{item.description}</Text>
-            )}
+          </View>
+        </View>
+
+        {claims.length > 0 && (
+          <View style={styles.chartContainer}>
+            <PieChart
+              data={getCategoryChartData()}
+              width={screenWidth - 80}
+              height={180}
+              chartConfig={{
+                backgroundColor: '#fff',
+                backgroundGradientFrom: '#fff',
+                backgroundGradientTo: '#fff',
+                color: () => `rgba(0, 0, 0, 1)`,
+              }}
+              accessor="population"
+              backgroundColor="transparent"
+              paddingLeft="5"
+              absolute
+              style={{ alignSelf: 'flex-start' }}
+            />
           </View>
         )}
-      />
-
-      <View style={styles.summaryContainer}>
-        <View style={styles.summaryBox}>
-          <Text style={styles.summaryLabel}>Number of Claims</Text>
-          <Text style={styles.summaryValue}>{claims.length}</Text>
-        </View>
-        <View style={styles.summaryBox}>
-          <Text style={styles.summaryLabel}>Total Value</Text>
-          <Text style={styles.summaryValue}>
-            £{claims.reduce((sum, c) => sum + parseFloat(c.amount), 0).toFixed(2)}
-          </Text>
-        </View>
       </View>
 
-      {claims.length > 0 && (
-        <View style={[styles.chartContainer, { marginTop: 20 }]}>
-          <PieChart
-            data={getCategoryChartData()}
-            width={screenWidth - 80}
-            height={180}
-            chartConfig={{
-              backgroundColor: '#fff',
-              backgroundGradientFrom: '#fff',
-              backgroundGradientTo: '#fff',
-              color: () => `rgba(0, 0, 0, 1)`,
-            }}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="5"
-            absolute
-            style={{ alignSelf: 'flex-start' }}
-          />
-        </View>
-      )}
+      <FlatList
+        contentContainerStyle={{ paddingTop: 350, paddingBottom: 100 }}
+        data={claims.slice(0, 5)}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => {
+          const statusStyle = getStatusStyle(item.status);
+          return (
+            <View style={styles.claimItem}>
+              <View style={styles.claimHeader}>
+                <Text style={styles.claimCategory}>{item.category}</Text>
+                <View style={[styles.statusTag, { backgroundColor: statusStyle.backgroundColor }]}>
+                  <Text style={[styles.statusText, { color: statusStyle.color }]}>
+                    {item.status}
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.claimInfo}>
+                £{item.amount} • {item.date?.split('T')[0] || item.date}
+              </Text>
+              {item.description && (
+                <Text style={styles.claimDescription}>{item.description}</Text>
+              )}
+            </View>
+          );
+        }}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#fff' },
   fab: {
     position: 'absolute',
     bottom: 20,
     right: 30,
     backgroundColor: '#222',
-    width: 60, // slightly smaller
-    height: 60, // slightly smaller
+    width: 60,
+    height: 60,
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
   },
-  fabText: { color: '#fff', fontSize: 34, fontWeight: 'bold' }, // scaled down font
+  fabText: { color: '#fff', fontSize: 34, fontWeight: 'bold' },
   optionsContainer: {
     position: 'absolute',
-    bottom: 95, // adjusted to match smaller size
+    bottom: 95,
     right: 30,
     flexDirection: 'column',
     alignItems: 'flex-end',
@@ -223,35 +245,26 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     backgroundColor: '#68636b',
-    width: 50, // slightly smaller
+    width: 50,
     height: 50,
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 5, // reduced spacing
+    marginBottom: 5,
   },
-  optionText: { color: '#fff', fontSize: 13, fontWeight: 'bold' }, // smaller font
-  claimItem: {
-    backgroundColor: '#f0f4f8',
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 10,
-    marginTop: 0,
+  optionText: { color: '#fff', fontSize: 13, fontWeight: 'bold' },
+  fixedTopSection: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+    right: 20,
+    zIndex: 1,
   },
-  claimHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 2,
-  },
-  claimCategory: { fontSize: 16, fontWeight: '600', color: '#333' },
-  claimStatus: { fontSize: 14, fontWeight: '500', color: '#666' },
-  claimInfo: { fontSize: 14, color: '#555' },
-  claimDescription: { fontSize: 12, color: '#777', marginTop: 4 },
+  spacer: { height: 10 },
   summaryContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 16,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   summaryBox: {
     flex: 1,
@@ -278,6 +291,32 @@ const styles = StyleSheet.create({
     padding: 0,
     elevation: 0,
   },
+  claimItem: {
+    backgroundColor: '#f0f4f8',
+    padding: 12,
+    borderRadius: 10,
+    marginHorizontal: 20,
+    marginBottom: 10,
+  },
+  claimHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  claimCategory: { fontSize: 16, fontWeight: '600', color: '#333' },
+  statusTag: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  claimInfo: { fontSize: 14, color: '#555' },
+  claimDescription: { fontSize: 12, color: '#777', marginTop: 4 },
 });
 
 export default DashboardScreen;
