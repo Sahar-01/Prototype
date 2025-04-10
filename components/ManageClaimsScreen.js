@@ -49,26 +49,27 @@ const ManageClaimsScreen = () => {
 
   const getAmountColor = (status) => {
     switch (status) {
-      case 'APPROVED': return '#2E7D32';
-      case 'PENDING': return '#FB8C00';
-      case 'REJECTED': return '#E53935';
-      case 'NEEDS_INFO': return '#FFB300';
-      default: return '#444';
+      case 'APPROVED': return '#34A853';
+      case 'PENDING': return '#FBBC05';
+      case 'REJECTED': return '#EA4335';
+      case 'NEEDS_INFO': return '#F29900';
+      default: return '#555';
     }
   };
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'APPROVED': return { backgroundColor: '#E8F5E9', color: '#2E7D32' };
-      case 'REJECTED': return { backgroundColor: '#FFEBEE', color: '#C62828' };
-      case 'NEEDS_INFO': return { backgroundColor: '#FFF8E1', color: '#FB8C00' };
-      case 'PENDING': return { backgroundColor: '#FFF3E0', color: '#EF6C00' };
+      case 'APPROVED': return { backgroundColor: '#E6F4EA', color: '#34A853' };
+      case 'REJECTED': return { backgroundColor: '#FDECEA', color: '#EA4335' };
+      case 'NEEDS_INFO': return { backgroundColor: '#FFF7E6', color: '#F29900' };
+      case 'PENDING': return { backgroundColor: '#FEF9E7', color: '#FBBC05' };
       default: return { backgroundColor: '#ECEFF1', color: '#37474F' };
     }
   };
 
   const renderClaim = ({ item }) => {
     const statusStyles = getStatusStyle(item.status);
+    const formattedDate = item.date.split('T')[0];
     return (
       <TouchableOpacity onPress={() => handleClaimPress(item)}>
         <View style={styles.itemContainer}>
@@ -76,7 +77,7 @@ const ManageClaimsScreen = () => {
             <Text style={styles.itemTitle}>{item.category}</Text>
             <Text style={[styles.itemAmount, { color: getAmountColor(item.status) }]}>£{item.amount}</Text>
           </View>
-          <Text style={styles.itemInfo}>Date: {item.date}</Text>
+          <Text style={styles.itemInfo}>Date: {formattedDate}</Text>
           <Text style={styles.itemInfo}>Staff: {item.staffId}</Text>
           <View style={[styles.statusTag, { backgroundColor: statusStyles.backgroundColor }]}>
             <Text style={[styles.statusText, { color: statusStyles.color }]}>{item.status}</Text>
@@ -134,14 +135,14 @@ const ManageClaimsScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.modalButton, { backgroundColor: '#E53935' }]}
+            style={[styles.modalButton, { backgroundColor: '#EA4335' }]}
             onPress={() => updateClaimStatus(selectedClaim.id, 'REJECTED')}
           >
             <Text style={styles.modalButtonText}>Reject</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.modalButton, { backgroundColor: '#FFA000' }]}
+            style={[styles.modalButton, { backgroundColor: '#F29900' }]}
             onPress={() => updateClaimStatus(selectedClaim.id, 'NEEDS_INFO')}
           >
             <Text style={styles.modalButtonText}>Request More Info</Text>
@@ -153,7 +154,7 @@ const ManageClaimsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#f9f9f9' },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
@@ -162,17 +163,17 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   itemContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#ffffff',
     padding: 16,
     borderRadius: 12,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#DCE3E8',
+    borderColor: '#E0E0E0',
     shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   itemHeader: {
     flexDirection: 'row',
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
     color: '#444',
   },
   modalButton: {
-    backgroundColor: '#C6FF00',
+    backgroundColor: '#34A853',
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',

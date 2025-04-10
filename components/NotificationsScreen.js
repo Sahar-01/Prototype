@@ -44,27 +44,54 @@ export default function NotificationsScreen({ route }) {
     setNotifications([]);
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.item}>
-      <View style={styles.iconContainer}>
-        <Ionicons name="notifications" size={24} color="#4ECDC4" />
+  const getStatusStyle = (message) => {
+    if (message.includes('APPROVED')) return { color: '#2E7D32' };
+    if (message.includes('REJECTED')) return { color: '#C62828' };
+    if (message.includes('PENDING') || message.includes('NEEDS_INFO')) return { color: '#FB8C00' };
+    return { color: '#1D2A32' };
+  };
+
+  const formatMessage = (text) => {
+    return text.replace(/Your claim #(\d+)/gi, 'Claim ID $1');
+  };
+
+  const renderItem = ({ item }) => {
+    const formattedMessage = formatMessage(item.message);
+    const words = formattedMessage.split(' ');
+
+    return (
+      <View style={styles.item}>
+        <View style={styles.iconContainer}>
+          <Ionicons name="notifications-outline" size={24} color="#C6FF00" />
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={styles.message}>
+            {words.map((word, index) => {
+              const isStatusWord = ['APPROVED', 'REJECTED', 'PENDING', 'NEEDS_INFO'].includes(word.toUpperCase());
+              return (
+                <Text key={index} style={isStatusWord ? getStatusStyle(word) : undefined}>
+                  {word + ' '}
+                </Text>
+              );
+            })}
+          </Text>
+          <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
+        </View>
       </View>
-      <View style={styles.textContainer}>
-        <Text style={styles.message}>{item.message}</Text>
-        <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.header}>Notifications</Text>
-        {notifications.length > 0 && (
-          <TouchableOpacity onPress={clearNotifications}>
-            <Ionicons name="trash" size={22} color="#E53935" />
-          </TouchableOpacity>
-        )}
+      <View style={styles.headerWrapper}>
+        <View style={styles.headerSpacer} />
+        <View style={styles.headerContainer}>
+          {notifications.length > 0 && (
+            <TouchableOpacity onPress={clearNotifications} style={styles.trashIcon}>
+              <Ionicons name="trash-outline" size={22} color="#E53935" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
       {loading ? (
         <ActivityIndicator size="large" color="#4ECDC4" style={{ marginTop: 30 }} />
@@ -84,18 +111,21 @@ export default function NotificationsScreen({ route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F7FA' },
+  headerWrapper: {
+    paddingTop: 10,
+    paddingHorizontal: 20,
+  },
+  headerSpacer: {
+    height: 10,
+  },
   headerContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 10,
   },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1D2A32',
+  trashIcon: {
+    padding: 6,
+    marginTop: 10,
   },
   item: {
     backgroundColor: '#FFFFFF',
@@ -118,8 +148,8 @@ const styles = StyleSheet.create({
   textContainer: { flex: 1 },
   message: {
     fontSize: 16,
-    color: '#1D2A32',
     fontWeight: '500',
+    color: '#1D2A32',
   },
   timestamp: {
     fontSize: 12,
@@ -133,4 +163,3 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
   },
 });
-
