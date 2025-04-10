@@ -75,6 +75,7 @@ export default function CreateClaimScreen({ navigation, route }) {
 
     try {
       const response = await axios.post('http://192.168.32.30:3000/expenses/submit', payload);
+
       if (response.status === 200) {
         Alert.alert('Success!', 'Expense claim submitted.');
         navigation.goBack();

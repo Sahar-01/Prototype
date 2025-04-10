@@ -31,7 +31,7 @@ const ManageClaimsScreen = () => {
 
   const updateClaimStatus = async (claimId, newStatus) => {
     try {
-      await axios.put(`http://192.168.32.30:3000/claims/${claimId}/status`, {
+      await axios.put(`http://192.168.32.30:3000/claims/${claimId}/status`, 
         status: newStatus,
       });
       setModalVisible(false);

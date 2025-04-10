@@ -3,26 +3,33 @@ import { StyleSheet, SafeAreaView, View, Text, TextInput, TouchableOpacity, Aler
 
 export default function SignUpScreen({ navigation }) {
   const [form, setForm] = useState({
+    full_name: '',
     username: '',
     email: '',
     password: '',
   });
 
   const handleSignUp = async () => {
-    const { username, email, password } = form;
+    const { full_name, username, email, password } = form;
   
-    if (!username || !email || !password) {
+    if (!full_name || !username || !email || !password) {
       Alert.alert('Please fill in all fields');
       return;
     }
-  
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Invalid email format');
+      return;
+    }
+    
     try {
       const response = await fetch('http://192.168.32.30:3000/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ full_name, username, email, password }),
       });
   
       const text = await response.text(); // get raw response for debugging
@@ -47,12 +54,23 @@ export default function SignUpScreen({ navigation }) {
     }
   };
   
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Create an Account</Text>
-
+  
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>Full Name</Text>
+          <TextInput
+            placeholder="Enter full name"
+            style={styles.inputControl}
+            onChangeText={(full_name) => setForm({ ...form, full_name })}
+            value={form.full_name}
+          />
+        </View>
+  
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Username</Text>
           <TextInput
@@ -62,7 +80,7 @@ export default function SignUpScreen({ navigation }) {
             value={form.username}
           />
         </View>
-
+  
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Email</Text>
           <TextInput
@@ -73,7 +91,7 @@ export default function SignUpScreen({ navigation }) {
             value={form.email}
           />
         </View>
-
+  
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Password</Text>
           <TextInput
@@ -84,17 +102,18 @@ export default function SignUpScreen({ navigation }) {
             value={form.password}
           />
         </View>
-
+  
         <TouchableOpacity onPress={handleSignUp} style={styles.btn}>
           <Text style={styles.btnText}>Sign Up</Text>
         </TouchableOpacity>
-
+  
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.formLink}>Already have an account? Sign in</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
+  
 }
 
 const styles = StyleSheet.create({

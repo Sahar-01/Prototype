@@ -54,17 +54,17 @@ export default function LogInScreen({ navigation }) {
         return;
       }
 
-      console.log('✅ Login successful:', data.user);
-
-      const isManager = email.startsWith('0');
-      const isFinance = email.startsWith('2');
-
-      // ✅ Pass username to Main stack
+          console.log('✅ Login successful:', data.user);
+          
+        const isManager = email.startsWith('0');
+        const isFinance = email.startsWith('2');
+          
       navigation.replace('Main', {
-        username: email,
-        isManager,
-        isFinance,
-      });
+      user: data.user,  // full user object
+      isManager,
+      isFinance,
+    });
+
     } catch (error) {
       console.error('Login error:', error);
       alert('Something went wrong. Please try again.');

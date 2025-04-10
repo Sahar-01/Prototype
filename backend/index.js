@@ -18,7 +18,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'Chers070.302',
+  password: 'Zamzam123?',
   database: 'expense_manager'
 });
 
@@ -33,16 +33,16 @@ db.connect((err) => {
 // ========================== AUTH ROUTES ==========================
 
 app.post('/auth/register', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { full_name, username, email, password } = req.body;
 
-  if (!username || !email || !password) {
+  if (!full_name || !username || !email || !password) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const query = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
-    db.query(query, [username, email, hashedPassword], (err) => {
+    const query = 'INSERT INTO users (full_name, username, email, password) VALUES (?, ?, ?, ?)';
+    db.query(query, [full_name, username, email, hashedPassword], (err) => {
       if (err) {
         console.error('Insert error:', err);
         return res.status(500).json({ message: 'Database error' });
@@ -64,12 +64,16 @@ app.post('/auth/login', (req, res) => {
 
     const user = results[0];
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) return res.status(401).json({ message: 'Invalid password' });
 
     res.status(200).json({
       message: 'Login successful',
-      user: { id: user.id, username: user.username, email: user.email }
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        full_name: user.full_name
+      }
     });
   });
 });
