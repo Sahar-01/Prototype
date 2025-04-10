@@ -233,5 +233,5 @@ app.post('/ocr', upload.single('file'), (req, res) => {
 });
 // ========================== START SERVER ==========================
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://192.168.32.30:${PORT}`);
+  console.log(`🚀 Server running on http://192.168.1.180:${PORT}`);
 });

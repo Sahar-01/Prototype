@@ -22,7 +22,7 @@ const ManageClaimsScreen = () => {
 
   const fetchAllClaims = async () => {
     try {
-      const response = await axios.get('http://192.168.32.30:3000/claims');
+      const response = await axios.get('http://192.168.1.180:3000/claims');
       setClaims(response.data);
     } catch (error) {
       console.error('❌ Error fetching claims:', error);
@@ -31,7 +31,7 @@ const ManageClaimsScreen = () => {
 
   const updateClaimStatus = async (claimId, newStatus) => {
     try {
-      await axios.put(`http://192.168.32.30:3000/claims/${claimId}/status`, 
+      await axios.put(`http://192.168.1.180:3000/claims/${claimId}/status`, {
         status: newStatus,
       });
       setModalVisible(false);

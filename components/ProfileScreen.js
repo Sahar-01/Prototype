@@ -68,22 +68,7 @@ export default function ProfileScreen({ navigation, route }) {
         <Text style={styles.value}>{user.email || '-'}</Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.label}>Preferred Currency</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={preferredCurrency}
-            onValueChange={(value) => setPreferredCurrency(value)}
-            style={styles.picker}
-          >
-            <Picker.Item label="GBP (£)" value="GBP" />
-            <Picker.Item label="USD ($)" value="USD" />
-            <Picker.Item label="EUR (€)" value="EUR" />
-            <Picker.Item label="JPY (¥)" value="JPY" />
-          </Picker>
-        </View>
-      </View>
-
+    
       <TouchableOpacity style={styles.primaryButton} onPress={toggleModal}>
         <Text style={styles.buttonText}>Change Password</Text>
       </TouchableOpacity>

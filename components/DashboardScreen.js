@@ -30,7 +30,7 @@ const DashboardScreen = ({ navigation, route }) => {
 
   const fetchClaims = async () => {
     try {
-      const response = await axios.get(`http://192.168.32.30:3000/claims?username=${username}`);
+      const response = await axios.get(`http://192.168.1.180:3000/claims?username=${username}`);
       setClaims(response.data);
     } catch (error) {
       console.error('Error fetching claims:', error);
@@ -65,7 +65,7 @@ const DashboardScreen = ({ navigation, route }) => {
     });
 
     try {
-      const response = await axios.post('http://192.168.32.30:3000/ocr', formData, {
+      const response = await axios.post('http://192.168.1.180:3000/ocr', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -89,7 +89,7 @@ const DashboardScreen = ({ navigation, route }) => {
     };
 
     try {
-      await axios.post('http://192.168.32.30:3000/claims', claim);
+      await axios.post('http://192.168.1.180:3000/claims', claim);
       fetchClaims();
     } catch (error) {
       console.error('Error creating OCR claim:', error);
