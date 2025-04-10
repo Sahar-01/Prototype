@@ -7,39 +7,29 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
-  SafeAreaView,
+  Dimensions,
 } from 'react-native';
 import axios from 'axios';
+import moment from 'moment';
+import { BarChart } from 'react-native-chart-kit';
 import Modal from 'react-native-modal';
 
-const ManageClaimsScreen = () => {
+const FinanceScreen = () => {
   const [claims, setClaims] = useState([]);
   const [selectedClaim, setSelectedClaim] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    fetchAllClaims();
+    fetchApprovedClaims();
   }, []);
 
-  const fetchAllClaims = async () => {
+  const fetchApprovedClaims = async () => {
     try {
       const response = await axios.get('http://192.168.32.30:3000/claims');
-      setClaims(response.data);
+      const approvedOnly = response.data.filter(claim => claim.status === 'APPROVED');
+      setClaims(approvedOnly);
     } catch (error) {
-      console.error('❌ Error fetching claims:', error);
-    }
-  };
-
-  const updateClaimStatus = async (claimId, newStatus) => {
-    try {
-      await axios.put(`http://192.168.32.30:3000/claims/${claimId}/status`, {
-        status: newStatus,
-      });
-      setModalVisible(false);
-      fetchAllClaims();
-    } catch (error) {
-      console.error('❌ Error updating status:', error);
-      Alert.alert('Update failed', 'Please try again later.');
+      console.error('❌ Error fetching approved claims:', error);
     }
   };
 
@@ -48,127 +38,166 @@ const ManageClaimsScreen = () => {
     setModalVisible(true);
   };
 
-  const getAmountColor = (status) => {
-    switch (status) {
-      case 'APPROVED': return '#2E7D32';
-      case 'PENDING': return '#FB8C00';
-      case 'REJECTED': return '#E53935';
-      case 'NEEDS_INFO': return '#FFB300';
-      default: return '#444';
-    }
+  const integrateClaim = () => {
+    Alert.alert('Integration Started', `Claim ID ${selectedClaim.id} is being integrated.`);
+    setModalVisible(false);
   };
 
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'APPROVED': return { backgroundColor: '#E8F5E9', color: '#2E7D32' };
-      case 'REJECTED': return { backgroundColor: '#FFEBEE', color: '#C62828' };
-      case 'NEEDS_INFO': return { backgroundColor: '#FFF8E1', color: '#FB8C00' };
-      case 'PENDING': return { backgroundColor: '#FFF3E0', color: '#EF6C00' };
-      default: return { backgroundColor: '#ECEFF1', color: '#37474F' };
-    }
+  const getMonthlyAmounts = () => {
+    const amounts = Array(12).fill(0);
+    claims.forEach((claim) => {
+      if (claim.date) {
+        const monthIndex = moment(claim.date).month();
+        amounts[monthIndex] += parseFloat(claim.amount);
+      }
+    });
+    return amounts;
   };
 
-  const renderClaim = ({ item }) => {
-    const statusStyles = getStatusStyle(item.status);
-    return (
-      <TouchableOpacity onPress={() => handleClaimPress(item)}>
-        <View style={styles.itemContainer}>
-          <View style={styles.itemHeader}>
-            <Text style={styles.itemTitle}>{item.category}</Text>
-            <Text style={[styles.itemAmount, { color: getAmountColor(item.status) }]}>£{item.amount}</Text>
-          </View>
-          <Text style={styles.itemInfo}>Date: {item.date}</Text>
-          <Text style={styles.itemInfo}>Staff ID: {item.staffId}</Text>
-          <View style={[styles.statusTag, { backgroundColor: statusStyles.backgroundColor }]}>
-            <Text style={[styles.statusText, { color: statusStyles.color }]}>{item.status}</Text>
-          </View>
+  const getTotalThisMonthAmount = () => {
+    const thisMonth = moment().month();
+    return claims
+      .filter((claim) => moment(claim.date).month() === thisMonth)
+      .reduce((sum, c) => sum + parseFloat(c.amount), 0);
+  };
+
+  const getAmountColor = () => '#2E7D32';
+
+  const renderClaim = ({ item }) => (
+    <TouchableOpacity onPress={() => handleClaimPress(item)}>
+      <View style={styles.itemContainer}>
+        <View style={styles.itemHeader}>
+          <Text style={styles.itemTitle}>{item.category}</Text>
+          <Text style={[styles.itemAmount, { color: getAmountColor() }]}>£{item.amount}</Text>
         </View>
-      </TouchableOpacity>
-    );
-  };
+        <Text style={styles.itemInfo}>Date: {moment(item.date).format('YYYY-MM-DD')}</Text>
+        <Text style={styles.itemInfo}>Staff: {item.staffId}</Text>
+        <View style={[styles.statusTag, { backgroundColor: '#E8F5E9' }]}>
+          <Text style={[styles.statusText, { color: '#2E7D32' }]}>APPROVED</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
-  const pendingClaims = claims.filter(c => c.status === 'PENDING');
-  const reviewedClaims = claims.filter(c => c.status !== 'PENDING');
+  const monthLabels = ['Jan', '', 'Mar', '', 'May', '', 'Jul', '', 'Sep', '', 'Nov', ''];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
-          {pendingClaims.length > 0 && (
-            <>
-              <Text style={styles.sectionTitle}>Claims to Review</Text>
-              <FlatList
-                data={pendingClaims}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderClaim}
-                scrollEnabled={false}
-              />
-            </>
-          )}
-
-          {reviewedClaims.length > 0 && (
-            <>
-              <Text style={styles.sectionTitle}>Reviewed Claims</Text>
-              <FlatList
-                data={reviewedClaims}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderClaim}
-                scrollEnabled={false}
-              />
-            </>
-          )}
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+        <View style={{ marginTop: 20 }}>
+          <BarChart
+            data={{
+              labels: monthLabels,
+              datasets: [{ data: getMonthlyAmounts() }],
+            }}
+            width={Dimensions.get('window').width - 40}
+            height={220}
+            yAxisLabel="£"
+            fromZero
+            chartConfig={{
+              backgroundGradientFrom: '#ffffff',
+              backgroundGradientTo: '#ffffff',
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
+              labelColor: () => '#222',
+              barPercentage: 0.7,
+              propsForBars: {
+                rx: 6,
+              },
+              propsForBackgroundLines: {
+                stroke: '#eee',
+              },
+            }}
+            style={styles.chart}
+          />
         </View>
+
+        {/* Summary Boxes */}
+        <View style={styles.summaryContainer}>
+          <View style={styles.summaryBox}>
+            <Text style={styles.summaryLabel}>Total this month</Text>
+            <Text style={styles.summaryValue}>£{getTotalThisMonthAmount().toFixed(2)}</Text>
+          </View>
+          <View style={styles.summaryBox}>
+            <Text style={styles.summaryLabel}>Total overall</Text>
+            <Text style={styles.summaryValue}>£{claims.reduce((sum, c) => sum + parseFloat(c.amount), 0).toFixed(2)}</Text>
+          </View>
+        </View>
+
+        {/* Approved Claims List */}
+        <Text style={styles.sectionTitle}>Approved Claims</Text>
+        <FlatList
+          data={claims}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderClaim}
+          scrollEnabled={false}
+        />
       </ScrollView>
 
+      {/* Integration Modal */}
       <Modal
         isVisible={isModalVisible}
         onBackdropPress={() => setModalVisible(false)}
         style={styles.modal}
       >
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Update Claim Status</Text>
+          <Text style={styles.modalTitle}>Integrate Claim</Text>
           <Text style={styles.modalClaim}>Claim ID: {selectedClaim?.id}</Text>
 
           <TouchableOpacity
-            style={styles.modalButton}
-            onPress={() => updateClaimStatus(selectedClaim.id, 'APPROVED')}
+            style={[styles.modalButton, { backgroundColor: '#4CAF50' }]}
+            onPress={integrateClaim}
           >
-            <Text style={styles.modalButtonText}>Approve</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.modalButton, { backgroundColor: '#E53935' }]}
-            onPress={() => updateClaimStatus(selectedClaim.id, 'REJECTED')}
-          >
-            <Text style={styles.modalButtonText}>Reject</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.modalButton, { backgroundColor: '#FFA000' }]}
-            onPress={() => updateClaimStatus(selectedClaim.id, 'NEEDS_INFO')}
-          >
-            <Text style={styles.modalButtonText}>Request More Info</Text>
+            <Text style={styles.modalButtonText}>Integrate</Text>
           </TouchableOpacity>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 };
 
+export default FinanceScreen;
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F7FA' },
+  container: { flex: 1, backgroundColor: '#fff' },
+  chart: {
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  summaryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    gap: 10,
+  },
+  summaryBox: {
+    backgroundColor: '#F1F5F9',
+    flex: 1,
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  summaryValue: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111827',
+  },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#37474F',
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1D2A32',
     marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    paddingBottom: 6,
+    marginTop: 10,
   },
   itemContainer: {
     backgroundColor: '#FFFFFF',
-    padding: 12,
+    padding: 16,
     borderRadius: 12,
     marginBottom: 10,
     borderWidth: 1,
@@ -183,15 +212,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  itemTitle: { fontSize: 16, fontWeight: '600', color: '#1E293B' },
-  itemAmount: { fontSize: 16, fontWeight: '600' },
-  itemInfo: { fontSize: 13, color: '#6B7280', marginTop: 4 },
+  itemTitle: { fontSize: 18, fontWeight: '600', color: '#222' },
+  itemAmount: { fontSize: 18, fontWeight: '600' },
+  itemInfo: { marginTop: 4, fontSize: 14, color: '#6B7280' },
   statusTag: {
     alignSelf: 'flex-start',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     borderRadius: 12,
-    marginTop: 6,
+    marginTop: 8,
   },
   statusText: {
     fontSize: 12,
@@ -220,7 +249,7 @@ const styles = StyleSheet.create({
     color: '#444',
   },
   modalButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#4CAF50',
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
@@ -232,5 +261,3 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 });
-
-export default ManageClaimsScreen;
