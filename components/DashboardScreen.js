@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
   Dimensions,
+  Modal,
 } from 'react-native';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
@@ -20,6 +21,8 @@ const DashboardScreen = ({ navigation, route }) => {
 
   const [claims, setClaims] = useState([]);
   const [showOptions, setShowOptions] = useState(false);
+  const [selectedClaim, setSelectedClaim] = useState(null);
+  const [isClaimModalVisible, setClaimModalVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -34,6 +37,17 @@ const DashboardScreen = ({ navigation, route }) => {
       setClaims(response.data);
     } catch (error) {
       console.error('Error fetching claims:', error);
+    }
+  };
+
+  const deleteClaim = async (id) => {
+    try {
+      await axios.delete(`http://192.168.32.30:3000/claims/${id}`);
+      setClaimModalVisible(false);
+      fetchClaims();
+    } catch (error) {
+      console.error('❌ Error deleting claim:', error);
+      Alert.alert('Delete failed', 'Please try again.');
     }
   };
 
@@ -133,6 +147,11 @@ const DashboardScreen = ({ navigation, route }) => {
     }));
   };
 
+  const openClaimOptions = (claim) => {
+    setSelectedClaim(claim);
+    setClaimModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.fab} onPress={() => setShowOptions(!showOptions)}>
@@ -197,25 +216,56 @@ const DashboardScreen = ({ navigation, route }) => {
         renderItem={({ item }) => {
           const statusStyle = getStatusStyle(item.status);
           return (
-            <View style={styles.claimItem}>
-              <View style={styles.claimHeader}>
-                <Text style={styles.claimCategory}>{item.category}</Text>
-                <View style={[styles.statusTag, { backgroundColor: statusStyle.backgroundColor }]}>
-                  <Text style={[styles.statusText, { color: statusStyle.color }]}>
-                    {item.status}
-                  </Text>
+            <TouchableOpacity onPress={() => openClaimOptions(item)}>
+              <View style={styles.claimItem}>
+                <View style={styles.claimHeader}>
+                  <Text style={styles.claimCategory}>{item.category}</Text>
+                  <View style={[styles.statusTag, { backgroundColor: statusStyle.backgroundColor }]}>
+                    <Text style={[styles.statusText, { color: statusStyle.color }]}> {item.status} </Text>
+                  </View>
                 </View>
+                <Text style={styles.claimInfo}>
+                  £{item.amount} • {item.date?.split('T')[0] || item.date}
+                </Text>
+                {item.description && (
+                  <Text style={styles.claimDescription}>{item.description}</Text>
+                )}
               </View>
-              <Text style={styles.claimInfo}>
-                £{item.amount} • {item.date?.split('T')[0] || item.date}
-              </Text>
-              {item.description && (
-                <Text style={styles.claimDescription}>{item.description}</Text>
-              )}
-            </View>
+            </TouchableOpacity>
           );
         }}
       />
+
+      <Modal
+        transparent
+        visible={isClaimModalVisible}
+        animationType="fade"
+        onRequestClose={() => setClaimModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Claim Options</Text>
+            <TouchableOpacity
+              style={styles.modalBtn}
+              onPress={() => {
+                setClaimModalVisible(false);
+                navigation.navigate('CreateClaim', { username, user, editClaim: selectedClaim });
+              }}
+            >
+              <Text style={styles.modalBtnText}>Edit Claim</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalBtn, { backgroundColor: '#E53935' }]}
+              onPress={() => deleteClaim(selectedClaim.id)}
+            >
+              <Text style={styles.modalBtnText}>Withdraw Claim</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setClaimModalVisible(false)}>
+              <Text style={styles.modalCancel}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -317,6 +367,43 @@ const styles = StyleSheet.create({
   },
   claimInfo: { fontSize: 14, color: '#555' },
   claimDescription: { fontSize: 12, color: '#777', marginTop: 4 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    backgroundColor: '#fff',
+    width: '80%',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#1D2A32',
+  },
+  modalBtn: {
+    backgroundColor: '#C6FF00',
+    paddingVertical: 12,
+    borderRadius: 10,
+    width: '100%',
+    alignItems: 'center',
+    marginVertical: 6,
+  },
+  modalBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalCancel: {
+    marginTop: 10,
+    color: '#1D2A32',
+    fontSize: 15,
+  },
 });
 
 export default DashboardScreen;
